@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <rect width="400" height="300" fill="#F5F0EB"/>
+  <text x="200" y="120" text-anchor="middle" font-family="Snell Roundhand, Edwardian Script ITC, cursive" font-size="48" font-style="italic" fill="#1A1A1A">Thank You</text>
+  <text x="200" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#666666">You are</text>
+  <text x="200" y="220" text-anchor="middle" font-family="Snell Roundhand, Edwardian Script ITC, cursive" font-size="36" font-style="italic" fill="#C9A961">Beyond Enough</text>
+</svg>

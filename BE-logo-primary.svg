@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
+  <style>
+    .logo { font-family: 'Didot', 'Bodoni MT', 'Georgia', serif; font-weight: 700; fill: #1A1A1A; }
+  </style>
+  <text x="200" y="150" text-anchor="middle" class="logo" font-size="160">B.E.</text>
+</svg>

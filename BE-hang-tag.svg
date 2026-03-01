@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="200" height="320">
+  <rect width="200" height="320" rx="4" fill="#1A1A1A"/>
+  <!-- Hole -->
+  <circle cx="100" cy="25" r="6" fill="none" stroke="#333" stroke-width="1"/>
+  <!-- Logo -->
+  <text x="100" y="150" text-anchor="middle" font-family="Didot, Bodoni MT, Georgia, serif" font-weight="700" font-size="56" fill="#C9A961">B.E.</text>
+  <!-- Divider -->
+  <line x1="60" y1="175" x2="140" y2="175" stroke="#C9A961" stroke-width="0.5" opacity="0.5"/>
+  <!-- Script -->
+  <text x="100" y="210" text-anchor="middle" font-family="Snell Roundhand, cursive" font-size="22" font-style="italic" fill="#C9A961" opacity="0.7">Beyond Enough</text>
+  <!-- Bottom -->
+  <text x="100" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" letter-spacing="3" fill="#666">B I J A D I</text>
+</svg>
