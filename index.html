@@ -1,113 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Little B.E. by BiJaDi — Beyond Enough</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    :root{--bk:#F5F0EB;--ch:#EDE6DE;--rg:#A0846E;--iv:#1A1A1A;--st:#6B5E4F}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Outfit',sans-serif;background:var(--bk);color:var(--iv);line-height:1.6}
-    .section{padding:8rem 2rem;text-align:center}
-    .inner{max-width:900px;margin:0 auto}
-    .sh{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,7vw,5.5rem);font-weight:300;margin:1rem 0}
-    .st{font-size:1.2rem;max-width:680px;margin:0 auto 2rem;color:var(--st)}
-    .sl{font-size:.8rem;letter-spacing:.3em;text-transform:uppercase;color:var(--rg);margin-bottom:1rem}
-    .btn{display:inline-block;padding:1rem 2.5rem;background:var(--iv);color:#fff;text-decoration:none;font-size:.95rem;letter-spacing:.1em}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:3rem;margin:4rem 0}
-    img{width:100%;height:auto;display:block}
-    .rv{opacity:0;transform:translateY(30px);transition:opacity .9s,transform .9s}
-    .rv.v{opacity:1;transform:translateY(0)}
-    @media (max-width:768px){.section{padding:6rem 1.5rem}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BiJaDi — Beyond Enough.</title>
+<meta name="description" content="BiJaDi is a family-focused luxury lifestyle brand rooted in grace, strength, and unapologetic elegance. Beyond Enough.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bk:#F5F0EB; --ch:#EDE6DE; --sm:#E2D9CF; --gr:#B8AFA5; --pw:#8B7D6B; --st:#6B5E4F;
+  --iv:#1A1A1A; --rg:#A0846E; --rgb:#8B7360; --cm:#C4A882; --de:#5E7E6B; --dw:#7A5C4A; --mg:#B89A5A;
+  --fd:'Cormorant Garamond',Georgia,serif; --fb:'Outfit','Helvetica Neue',sans-serif;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; font-size:16px; }
+body {
+  font-family:var(--fb); background:var(--bk); color:var(--iv); overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before {
+  content:''; position:fixed; inset:0; z-index:9999; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:.15;
+}
+
+/* Core fix: full image visibility, no forced cropping */
+img {
+  width:100%; max-width:100%; height:auto; object-fit:contain; object-position:center;
+  display:block; margin:0 auto;
+}
+.background-image-container,
+section[style*="background-image"],
+.hero-bg, .collage-section {
+  background-size:contain !important;
+  background-position:center top !important;
+  background-repeat:no-repeat !important;
+  min-height:600px; /* breathing room */
+}
+
+/* NAV (your original mobile toggle) */
+.nav {
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:1.5rem 3rem; transition:all .4s;
+}
+.nav.scrolled { background:rgba(245,240,235,.92); backdrop-filter:blur(20px); box-shadow:0 1px 20px rgba(139,125,107,.08); }
+.nav-logo { font-family:var(--fd); font-size:1.6rem; font-weight:300; letter-spacing:.25em; color:var(--iv); text-decoration:none; }
+.nav-logo span { color:var(--rg); }
+.nav-links { display:flex; gap:2.5rem; list-style:none; }
+.nav-links a { font-size:.7rem; font-weight:400; letter-spacing:.2em; text-transform:uppercase; color:var(--st); text-decoration:none; transition:color .3s; position:relative; }
+.nav-links a::after { content:''; position:absolute; bottom:-4px; left:0; width:0; height:1px; background:var(--rg); transition:width .3s; }
+.nav-links a:hover { color:var(--iv); }
+.nav-links a:hover::after { width:100%; }
+.nav-toggle { display:none; background:none; border:none; cursor:pointer; padding:.5rem; z-index:1001; }
+.nav-toggle span { display:block; width:24px; height:1px; background:var(--iv); margin:6px 0; transition:all .3s; }
+
+/* SHARED */
+.section { padding:7rem 3rem; position:relative; }
+.sl { font-size:.6rem; font-weight:500; letter-spacing:.4em; text-transform:uppercase; color:var(--rg); margin-bottom:1.25rem; }
+.sh { font-family:var(--fd); font-size:clamp(2rem,4vw,3.2rem); font-weight:300; line-height:1.2; color:var(--iv); margin-bottom:1.25rem; }
+.st { font-size:.9rem; font-weight:300; line-height:1.8; color:var(--st); max-width:580px; }
+.divider { width:50px; height:1px; background:linear-gradient(to right,var(--rg),transparent); margin:1.75rem 0; }
+.inner { max-width:1200px; margin:0 auto; }
+.rv { opacity:0; transform:translateY(40px); transition:opacity .8s ease,transform .8s ease; }
+.rv.v { opacity:1; transform:translateY(0); }
+
+/* HERO / MAIN COLLAGE - using one of your existing images as background example */
+.hero-bg {
+  min-height:90vh; background-image:url('https://img1.wsimg.com/isteam/ip/25889226-cc6b-4c6b-aee8-a0772b910049/ChatGPT%20Image%20Jul%2010%2C%202025%2C%2002_06_18%20AM.png');
+}
+
+/* MANIFESTO */
+.mf { background:var(--ch); display:grid; grid-template-columns:1fr 1fr; gap:0; }
+.mf-c { padding:6rem 5rem; display:flex; flex-direction:column; justify-content:center; }
+.mf-v {
+  position:relative; min-height:650px;
+  background:linear-gradient(155deg,var(--sm) 0%,var(--dw) 60%,var(--ch) 100%);
+  overflow:hidden; background-size:contain !important; background-position:center top !important;
+}
+
+/* PRODUCT COLLAGES - full images */
+.product-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:2rem; margin:3rem 0; }
+.product-grid img { max-height:500px; }
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .section { padding:5rem 1.5rem; }
+  .mf { grid-template-columns:1fr; }
+  .mf-v { min-height:500px; }
+  img, .hero-bg { object-fit:contain !important; background-size:contain !important; }
+}
+</style>
 </head>
 <body>
 
-  <!-- NAV (minimal – BiJaDi as parent) -->
-  <nav style="position:fixed;top:0;width:100%;padding:1.5rem 3rem;z-index:10;background:rgba(245,240,235,.9);backdrop-filter:blur(10px);display:flex;justify-content:space-between;align-items:center">
-    <a href="#" style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--iv);text-decoration:none">Bi<span style="color:var(--rg)">Ja</span>Di</a>
-    <a href="#shop" style="font-size:.9rem;letter-spacing:.15em;text-transform:uppercase;color:var(--st)">Shop Little B.E.</a>
-  </nav>
+<nav class="nav" id="nav">
+  <a href="#" class="nav-logo">Bi<span>Ja</span>Di</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#story">STORY</a></li>
+    <li><a href="#accessories">ACCESSORIES</a></li>
+    <li><a href="#lifestyle">LIFESTYLE</a></li>
+    <li><a href="#be">B.E.</a></li>
+    <li><a href="#family">FAMILY</a></li>
+    <li><a href="#little">LITTLE B.E.</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+</nav>
 
-  <!-- HERO -->
-  <section class="section" style="padding-top:14rem;min-height:85vh;display:flex;align-items:center">
-    <div class="inner rv">
-      <h1 class="sh">Little B.E.</h1>
-      <p class="st">Small reminders for growing hearts.</p>
-      <a href="#shop" class="btn">Shop the Collection</a>
-      <p class="st" style="margin-top:2.5rem;font-style:italic;opacity:.8">Because every child is already Beyond Enough.</p>
-      <p style="margin-top:3rem;font-size:.95rem;opacity:.7">A collection by BiJaDi</p>
+<!-- HERO -->
+<section class="section hero-bg rv">
+  <div class="inner">
+    <p class="sl">FIRST DROP COLLECTION</p>
+    <h2 class="sh">B.E.<br>Beyond Enough</h2>
+    <p class="st">Elevated · Timeless · Empowering</p>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section class="mf" id="manifesto">
+  <div class="mf-c rv">
+    <p class="sl">OUR STORY</p>
+    <h2 class="sh">Quiet Power</h2>
+    <p class="st">Family-focused luxury lifestyle brand rooted in grace, strength, and unapologetic elegance. Beyond Enough.</p>
+    <div class="divider"></div>
+  </div>
+  <div class="mf-v rv"></div>
+</section>
+
+<!-- B.E. PRODUCTS / COLLAGE -->
+<section class="section" id="be">
+  <div class="inner rv">
+    <p class="sl text-center">B.E. COLLECTION</p>
+    <h2 class="sh text-center">Everyday Elevated</h2>
+    <div class="product-grid">
+      <img src="https://img1.wsimg.com/isteam/ip/25889226-cc6b-4c6b-aee8-a0772b910049/ChatGPT%20Image%20Jul%2010%2C%202025%2C%2002_06_18%20AM.png" alt="The Unbent Blazer - Cream / Black">
+      <img src="https://img1.wsimg.com/isteam/ip/25889226-cc6b-4c6b-aee8-a0772b910049/ChatGPT%20Image%20Jul%2010%2C%202025%2C%2002_10_42%20AM.png" alt="The Mirror Tee - Black">
+      <img src="https://img1.wsimg.com/isteam/ip/25889226-cc6b-4c6b-aee8-a0772b910049/ChatGPT%20Image%20Jul%2010%2C%202025%2C%2002_17_18%20AM.png" alt="Tapered Trouser / Joggers - Black">
+      <img src="https://img1.wsimg.com/isteam/ip/25889226-cc6b-4c6b-aee8-a0772b910049/ChatGPT%20Image%20Jul%2010%2C%202025%2C%2002_19_13%20AM.png" alt="Silence Skirt - Taupe / Cream">
+      <!-- Add more of your existing images here as needed -->
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- PHILOSOPHY -->
-  <section class="section" style="background:#FAF7F2">
-    <div class="inner rv">
-      <p class="sl">The Meaning</p>
-      <h2 class="sh">What does B.E. mean?</h2>
-      <p class="st">Beyond Enough.<br>Every child deserves to grow up knowing they are already enough — curious enough, brave enough, kind enough.<br>Little B.E. is a quiet reminder of that truth.</p>
-    </div>
-  </section>
+<!-- SUBSCRIBE -->
+<section class="section co" id="community">
+  <div class="inner rv text-center">
+    <p class="sl">JOIN THE MOVEMENT</p>
+    <h2 class="sh">You Already Know.<br>Now Be the First.</h2>
+    <p class="st">Subscribe for exclusive early access.</p>
+    <form style="max-width:480px; margin:2rem auto; display:flex; gap:1rem;" onsubmit="event.preventDefault();this.querySelector('button').textContent='Welcome ✓';this.querySelector('input').value='';">
+      <input type="email" placeholder="Your email address" required style="flex:1; padding:1rem; border:1px solid #ccc;">
+      <button type="submit" style="padding:1rem 2rem; background:#000; color:#fff; border:none;">Subscribe</button>
+    </form>
+  </div>
+</section>
 
-  <!-- CAPSULE -->
-  <section class="section" id="shop">
-    <div class="inner rv">
-      <p class="sl">The Capsule</p>
-      <h2 class="sh">Little B.E. Essentials</h2>
-      <div class="grid">
-        <div>
-          <img src="https://img1.wsimg.com/your-hoodie-flatlay.jpg" alt="Hoodie">
-          <h3 style="margin:1.5rem 0 .5rem">Hoodie</h3>
-          <p class="st">Cream / Taupe • Soft premium blend • Tone-on-tone B.E. embroidery</p>
-        </div>
-        <div>
-          <img src="https://img1.wsimg.com/your-jogger-flatlay.jpg" alt="Jogger">
-          <h3 style="margin:1.5rem 0 .5rem">Jogger</h3>
-          <p class="st">Relaxed fit • Hidden message tag • Gentle on skin</p>
-        </div>
-        <div>
-          <img src="https://img1.wsimg.com/your-tee-flatlay.jpg" alt="Tee">
-          <h3 style="margin:1.5rem 0 .5rem">Tee</h3>
-          <p class="st">Breathable cotton • Subtle B.E. detail • Everyday elegance</p>
-        </div>
-      </div>
-    </div>
-  </section>
+<!-- FOOTER -->
+<footer style="background:#000; color:#fff; padding:4rem 2rem; text-align:center;">
+  <p>© 2026 BiJaDi LLC. A Tru Skool® Entertainment brand.</p>
+</footer>
 
-  <!-- HIDDEN MESSAGE -->
-  <section class="section" style="background:var(--ch)">
-    <div class="inner rv">
-      <p class="sl">A Message Just for Them</p>
-      <h2 class="sh">Hidden Reminders</h2>
-      <p class="st">Inside every piece: a quiet stitched whisper.<br>“You are already enough.” • “Dream bravely.” • “Kindness is strength.”</p>
-      <!-- Add close-up tag image here if ready -->
-    </div>
-  </section>
-
-  <!-- NEWSLETTER -->
-  <section class="section" style="background:var(--iv);color:#fff">
-    <div class="inner rv">
-      <p class="sl" style="color:var(--rg)">Join the B.E. Family</p>
-      <h2 class="sh" style="color:#fff">Be First to Know</h2>
-      <p class="st" style="color:#ddd">Exclusive early access & new drops.</p>
-      <form style="max-width:480px;margin:2rem auto;display:flex;gap:1rem;justify-content:center">
-        <input type="email" placeholder="Your email" required style="flex:1;padding:1rem;border:none;max-width:320px">
-        <button type="submit" class="btn" style="background:var(--rg);color:#000">Join</button>
-      </form>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer style="padding:4rem 2rem;text-align:center;font-size:.9rem;color:var(--st);background:var(--bk)">
-    <p>© 2026 BiJaDi LLC • Little B.E. by BiJaDi • Beyond Enough</p>
-  </footer>
-
-  <script>
-    const obs = new IntersectionObserver(e => {
-      e.forEach(el => { if (el.isIntersecting) el.target.classList.add('v'); });
-    }, {threshold:0.15});
-    document.querySelectorAll('.rv').forEach(el => obs.observe(el));
-  </script>
+<script>
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 50));
+const nt = document.getElementById('navToggle'), nl = document.getElementById('navLinks');
+nt.addEventListener('click', () => nl.classList.toggle('active'));
+const rvs = document.querySelectorAll('.rv');
+const obs = new IntersectionObserver(e => e.forEach(el => { if (el.isIntersecting) el.classList.add('v'); }), {threshold:0.12});
+rvs.forEach(el => obs.observe(el));
+</script>
 </body>
 </html>
