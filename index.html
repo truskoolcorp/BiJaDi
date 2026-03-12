@@ -9,6 +9,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+
+  /* Product images in capsule — smaller, contained, centered */
+.product-img {
+  max-width: 420px;           /* change to 380px or 450px if you want it smaller/larger */
+  margin: 3rem auto 1.5rem;
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(160,132,110,0.08);
+}
 :root {
   --bk:#F5F0EB; --ch:#EDE6DE; --sm:#E2D9CF; --gr:#B8AFA5; --pw:#8B7D6B; --st:#6B5E4F;
   --iv:#1A1A1A; --rg:#A0846E; --rgb:#8B7360; --cm:#C4A882; --de:#5E7E6B; --dw:#7A5C4A; --mg:#B89A5A;
@@ -197,14 +206,17 @@ section[style*="background-image"],
   </div>
 </section>
 
-<!-- CAPSULE / B.E. SECTION -->
+<!-- CAPSULE / B.E. SECTION – FIXED -->
 <section class="section ci" id="capsule">
   <div class="inner rv">
     <p class="sl">B.E. COLLECTION</p>
     <h2 class="sh">Everyday Elevated</h2>
-    <!-- Add your product images here; they will now use contain -->
-    <img src="hoodie-2.png" alt="B.E. Oversized Hoodie Cream/Black">
-    <img src="Tee-2.png" alt="B.E. Silk-Cotton Top Cream/Taupe">
+    
+    <img src="/Hoodie-2.png" class="product-img" alt="B.E. Oversized Hoodie Cream/Black">
+    <img src="/Tee-2.png" class="product-img" alt="B.E. Silk-Cotton Top Cream/Taupe">
+    
+    <!-- Add more images the same way -->
+    <!-- <img src="/Jogger-1.png" class="product-img" alt="Jogger"> -->
   </div>
 </section>
 
