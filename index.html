@@ -14,8 +14,24 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.8rem 5%;display:fl
 .logo img{height:42px}
 .nav-link{font-size:0.95rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--st);text-decoration:none}
 
-.hero{height:100vh;display:flex;align-items:center;justify-content:center;position:relative;text-align:center;background:url('/BiJaDi_Logo-Black.png') center/cover no-repeat}
-.hero::before{content:"";position:absolute;inset:0;background:var(--bk);opacity:0.88}
+/* FIXED HERO — full logo, no cropping */
+.hero{
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  text-align:center;
+  background:url('/BiJaDi_Logo-Black.png') center / contain no-repeat;
+  background-color:var(--bk);
+}
+.hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:var(--bk);
+  opacity:0.93;           /* stronger blend so logo stays elegant */
+}
 .hero-content{position:relative;z-index:2;max-width:820px;padding:0 5%}
 .sh{font-family:'Cormorant Garamond',serif;font-size:clamp(3.4rem,8vw,6.2rem);font-weight:300;margin:1rem 0}
 .st{font-size:1.25rem;color:var(--st);max-width:680px;margin:0 auto 2rem}
@@ -27,7 +43,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.8rem 5%;display:fl
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:3rem;margin:4rem 0}
 img,svg{width:100%;height:auto;display:block}
 .asset{max-width:220px;margin:2rem auto}
-
 footer{padding:6rem 5% 3rem;text-align:center;font-size:0.95rem;color:var(--st);border-top:1px solid #e0d9d0}
 @media(max-width:768px){.section{padding:7rem 6%}}
 </style>
@@ -39,7 +54,7 @@ footer{padding:6rem 5% 3rem;text-align:center;font-size:0.95rem;color:var(--st);
   <a href="#shop" class="nav-link">SHOP LITTLE B.E.</a>
 </nav>
 
-<!-- HERO – Lifestyle kids (matches your Example-1) -->
+<!-- HERO -->
 <section class="hero">
   <div class="hero-content">
     <h1 class="sh">Little B.E.</h1>
@@ -62,29 +77,20 @@ footer{padding:6rem 5% 3rem;text-align:center;font-size:0.95rem;color:var(--st);
   </div>
 </section>
 
-<!-- CAPSULE – Exact layout from your Example-1 -->
+<!-- CAPSULE -->
 <section class="section" id="shop">
   <div class="inner">
     <p class="sl">THE CAPSULE</p>
     <h2 class="sh">The Little B.E. Capsule</h2>
     <div class="grid">
-      <div>
-        <img src="/Hoodie-1.png" alt="Hoodie">
-        <h3 style="margin:1.8rem 0 .5rem">Hoodie</h3>
-      </div>
-      <div>
-        <img src="/Jogger-1.png" alt="Jogger">
-        <h3 style="margin:1.8rem 0 .5rem">Jogger</h3>
-      </div>
-      <div>
-        <img src="/Tee-1.png" alt="Tee">
-        <h3 style="margin:1.8rem 0 .5rem">Tee</h3>
-      </div>
+      <div><img src="/Hoodie-1.png" alt="Hoodie"><h3 style="margin:1.8rem 0 .5rem">Hoodie</h3></div>
+      <div><img src="/Jogger-1.png" alt="Jogger"><h3 style="margin:1.8rem 0 .5rem">Jogger</h3></div>
+      <div><img src="/Tee-1.png" alt="Tee"><h3 style="margin:1.8rem 0 .5rem">Tee</h3></div>
     </div>
   </div>
 </section>
 
-<!-- HIDDEN MESSAGE – Matches Example-1 -->
+<!-- HIDDEN MESSAGE -->
 <section class="section">
   <div class="inner">
     <p class="sl">A MESSAGE JUST FOR THEM</p>
