@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Little B.E. — Your Moment</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garabold:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0EB;
+    --black: #1A1A1A;
+    --taupe: #8B7D6B;
+    --gold: #C4A265;
+    --gold-light: #D4B87A;
+    --gold-dark: #A8884E;
+    --warm-white: #FAF8F5;
+    --charcoal: #2D2D2D;
+    --cream-dark: #E8E0D6;
+    --taupe-light: #A99B8A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--cream);
+    color: var(--black);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== LOADING SCREEN ===== */
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--black);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+  }
+  .loading-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .loading-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.8rem;
+    font-weight: 600;
+    color: var(--cream);
+    letter-spacing: 0.15em;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.3s forwards;
+  }
+  .loading-sub {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 300;
+    color: var(--gold);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-top: 8px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.6s forwards;
+  }
+  .loading-line {
+    width: 60px;
+    height: 1px;
+    background: var(--gold);
+    margin-top: 24px;
+    transform: scaleX(0);
+    animation: scaleLine 1.5s ease 0.8s forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleLine {
+    to { transform: scaleX(1); }
+  }
+
+  /* ===== APP CONTAINER ===== */
+  .app {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* ===== NAV TABS ===== */
+  .nav-bar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: var(--black);
+    display: flex;
+    z-index: 100;
+    padding: 6px 0 env(safe-area-inset-bottom, 8px);
+    border-top: 1px solid rgba(196,162,101,0.15);
+  }
+  .nav-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 4px 6px;
+    background: none;
+    border: none;
+    color: var(--taupe-light);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    position: relative;
+  }
+  .nav-tab.active { color: var(--gold); }
+  .nav-tab.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 25%;
+    width: 50%;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 0 0 2px 2px;
+  }
+  .nav-tab svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ===== SCREENS ===== */
+  .screen {
+    display: none;
+    padding: 0 24px 100px;
+    animation: screenIn 0.4s ease;
+  }
+  .screen.active { display: block; }
+  @keyframes screenIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== HERO / HOME ===== */
+  .hero {
+    padding-top: 48px;
+    text-align: center;
+  }
+  .hero-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: var(--black);
+  }
+  .hero-line {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.65rem;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.15em;
+    color: var(--taupe);
+    margin-top: 2px;
+  }
+  .hero-divider {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    margin: 20px auto;
+  }
+  .hero-garment-badge {
+    display: inline-block;
+    background: var(--black);
+    color: var(--cream);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+  .hero-garment-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--black);
+    margin-bottom: 6px;
+  }
+  .hero-garment-detail {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: var(--taupe);
+    letter-spacing: 0.08em;
+  }
+  .hero-auth {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 24px;
+    background: var(--warm-white);
+    border: 1px solid var(--cream-dark);
+    border-radius: 4px;
+  }
+  .auth-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4CAF50;
+    box-shadow: 0 0 6px rgba(76,175,80,0.4);
+  }
+  .auth-text {
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--charcoal);
+  }
+  .auth-text strong {
+    font-weight: 600;
+    color: var(--black);
+  }
+
+  /* Feature cards */
+  .features {
+    margin-top: 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .feature-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    background: var(--warm-white);
+    border: 1px solid var(--cream-dark);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: left;
+  }
+  .feature-card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 4px 20px rgba(196,162,101,0.1);
+  }
+  .feature-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .feature-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--gold);
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .feature-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--black);
+  }
+  .feature-desc {
+    font-size: 0.7rem;
+    font-weight: 300;
+    color: var(--taupe);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+  .feature-arrow {
+    margin-left: auto;
+    color: var(--taupe-light);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  /* ===== SPIN WHEEL SCREEN ===== */
+  .wheel-header {
+    text-align: center;
+    padding-top: 40px;
+    margin-bottom: 32px;
+  }
+  .wheel-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: var(--black);
+  }
+  .wheel-header p {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: var(--taupe);
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+  }
+
+  .wheel-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto 32px;
+  }
+  .wheel-canvas {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 0 6px var(--black), 0 0 0 8px var(--gold), 0 12px 40px rgba(0,0,0,0.15);
+  }
+  .wheel-pointer {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-top: 24px solid var(--gold);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    z-index: 5;
+  }
+  .wheel-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--black);
+    border: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+  }
+  .wheel-center span {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+  }
+
+  .spin-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: var(--black);
+    color: var(--cream);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .spin-btn:hover { background: var(--charcoal); }
+  .spin-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .spin-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  /* Prize modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,26,0.85);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--cream);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 40px 32px;
+    text-align: center;
+    max-width: 360px;
+    width: 100%;
+    position: relative;
+    animation: modalIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.85) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-wax {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--gold);
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--black);
+    letter-spacing: 0.1em;
+    box-shadow: 0 4px 16px rgba(196,162,101,0.3);
+  }
+  .modal h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--black);
+    margin-bottom: 8px;
+  }
+  .modal .prize-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gold-dark);
+    margin-bottom: 4px;
+  }
+  .modal .prize-code {
+    display: inline-block;
+    background: var(--black);
+    color: var(--gold);
+    font-family: 'Outfit', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    padding: 10px 24px;
+    border-radius: 4px;
+    margin: 16px 0;
+    cursor: pointer;
+    position: relative;
+  }
+  .prize-code-hint {
+    font-size: 0.65rem;
+    font-weight: 300;
+    color: var(--taupe);
+  }
+  .modal-close {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-top: 20px;
+    background: none;
+    border: 1px solid var(--black);
+    border-radius: 4px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--black);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .modal-close:hover {
+    background: var(--black);
+    color: var(--cream);
+  }
+
+  /* ===== MEMORIES SCREEN ===== */
+  .memories-header {
+    text-align: center;
+    padding-top: 40px;
+    margin-bottom: 28px;
+  }
+  .memories-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 500;
+  }
+  .memories-header p {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: var(--taupe);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  .memory-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border: 1px solid var(--cream-dark);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .memory-tab {
+    flex: 1;
+    padding: 12px;
+    background: var(--warm-white);
+    border: none;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--taupe);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .memory-tab.active {
+    background: var(--black);
+    color: var(--cream);
+  }
+
+  .memory-form { display: none; }
+  .memory-form.active { display: block; }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+  .form-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--taupe);
+    margin-bottom: 8px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--warm-white);
+    border: 1px solid var(--cream-dark);
+    border-radius: 4px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    color: var(--black);
+    transition: border-color 0.25s ease;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--gold); }
+  .form-input::placeholder { color: var(--taupe-light); }
+
+  textarea.form-input {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+  }
+
+  .photo-upload {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: var(--warm-white);
+    border: 2px dashed var(--cream-dark);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .photo-upload:hover { border-color: var(--gold); }
+  .photo-upload svg {
+    width: 32px;
+    height: 32px;
+    stroke: var(--taupe-light);
+    fill: none;
+    stroke-width: 1.2;
+  }
+  .photo-upload span {
+    font-size: 0.7rem;
+    font-weight: 300;
+    color: var(--taupe);
+  }
+  .photo-upload img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .photo-upload input { display: none; }
+
+  .submit-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: var(--gold);
+    color: var(--black);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+  }
+  .submit-btn:hover { background: var(--gold-light); }
+
+  /* Letter vault specific */
+  .seal-date {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .seal-date .form-input { flex: 1; }
+
+  .vault-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+    background: rgba(196,162,101,0.08);
+    border: 1px solid rgba(196,162,101,0.2);
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  .vault-note svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--gold);
+    fill: none;
+    stroke-width: 1.5;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .vault-note p {
+    font-size: 0.7rem;
+    font-weight: 300;
+    color: var(--taupe);
+    line-height: 1.5;
+  }
+
+  /* ===== SHARE / REFERRAL SCREEN ===== */
+  .share-header {
+    text-align: center;
+    padding-top: 40px;
+    margin-bottom: 28px;
+  }
+  .share-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 500;
+  }
+  .share-header p {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: var(--taupe);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  .referral-card {
+    background: var(--black);
+    border-radius: 8px;
+    padding: 28px 24px;
+    text-align: center;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .referral-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .referral-label {
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--taupe-light);
+    margin-bottom: 12px;
+  }
+  .referral-code-display {
+    font-family: 'Outfit', monospace;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    padding: 12px;
+    background: rgba(196,162,101,0.08);
+    border: 1px solid rgba(196,162,101,0.2);
+    border-radius: 4px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    transition: background 0.25s ease;
+  }
+  .referral-code-display:hover { background: rgba(196,162,101,0.15); }
+  .referral-hint {
+    font-size: 0.65rem;
+    font-weight: 300;
+    color: var(--taupe-light);
+  }
+
+  .share-tiers {
+    margin-bottom: 24px;
+  }
+  .tier-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--black);
+    margin-bottom: 14px;
+  }
+  .tier-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--cream-dark);
+  }
+  .tier-item:last-child { border-bottom: none; }
+  .tier-count {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--warm-white);
+    border: 1px solid var(--cream-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--black);
+    flex-shrink: 0;
+  }
+  .tier-reward {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--black);
+  }
+  .tier-reward span {
+    font-weight: 300;
+    color: var(--taupe);
+    font-size: 0.7rem;
+  }
+
+  .share-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .share-btn {
+    padding: 14px;
+    background: var(--warm-white);
+    border: 1px solid var(--cream-dark);
+    border-radius: 4px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--black);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .share-btn:hover {
+    border-color: var(--gold);
+    background: var(--cream);
+  }
+  .share-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.5;
+  }
+
+  /* ===== SUCCESS STATE ===== */
+  .success-message {
+    text-align: center;
+    padding: 40px 20px;
+    animation: fadeUp 0.5s ease;
+  }
+  .success-message .check-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--gold);
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .success-message .check-circle svg {
+    width: 28px;
+    height: 28px;
+    stroke: var(--black);
+    fill: none;
+    stroke-width: 2;
+  }
+  .success-message h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .success-message p {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: var(--taupe);
+    line-height: 1.5;
+  }
+
+  /* ===== FOOTER BRANDING ===== */
+  .brand-footer {
+    text-align: center;
+    padding: 32px 0 20px;
+    margin-top: 24px;
+    border-top: 1px solid var(--cream-dark);
+  }
+  .brand-footer .bf-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--black);
+  }
+  .brand-footer .bf-sub {
+    font-size: 0.55rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--taupe-light);
+    margin-top: 3px;
+  }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--black);
+    color: var(--cream);
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 300;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ===== CONFETTI ===== */
+  .confetti-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 250;
+    overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    top: -10px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    to { top: 110vh; transform: rotate(720deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">Little B.E.</div>
+  <div class="loading-sub">Beyond Enough</div>
+  <div class="loading-line"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- PRIZE MODAL -->
+<div class="modal-overlay" id="prizeModal">
+  <div class="modal">
+    <div class="modal-wax">B.E.</div>
+    <h3>You Won!</h3>
+    <div class="prize-name" id="prizeName"></div>
+    <div class="prize-code" id="prizeCode" onclick="copyCode(this)"></div>
+    <div class="prize-code-hint">Tap to copy</div>
+    <button class="modal-close" onclick="closeModal()">Continue</button>
+  </div>
+</div>
+
+<!-- CONFETTI -->
+<div class="confetti-container" id="confetti"></div>
+
+<!-- APP -->
+<div class="app">
+
+  <!-- ===== HOME SCREEN ===== -->
+  <div class="screen active" id="screenHome">
+    <div class="hero">
+      <div class="hero-brand">Little B.E.</div>
+      <div class="hero-line">Beyond Enough</div>
+      <div class="hero-divider"></div>
+
+      <div class="hero-garment-badge">Authenticated Garment</div>
+      <div class="hero-garment-name">Cream Hoodie</div>
+      <div class="hero-garment-detail">Little B.E. Collection — Size 4T — Edition 047 of 200</div>
+
+      <div class="hero-auth">
+        <div class="auth-dot"></div>
+        <div class="auth-text"><strong>Verified Authentic</strong> — Registered to this device</div>
+      </div>
+
+      <div class="features">
+        <div class="feature-card" onclick="goTo('screenWheel')">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0110 10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div>
+            <div class="feature-title">Spin to Win</div>
+            <div class="feature-desc">Every scan is a guaranteed reward</div>
+          </div>
+          <div class="feature-arrow">&#8250;</div>
+        </div>
+
+        <div class="feature-card" onclick="goTo('screenMemories')">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+          <div>
+            <div class="feature-title">Our Little B.E. Moment</div>
+            <div class="feature-desc">Create a memory with this garment</div>
+          </div>
+          <div class="feature-arrow">&#8250;</div>
+        </div>
+
+        <div class="feature-card" onclick="goTo('screenShare')">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </div>
+          <div>
+            <div class="feature-title">Share & Earn</div>
+            <div class="feature-desc">Unlock rewards for your family circle</div>
+          </div>
+          <div class="feature-arrow">&#8250;</div>
+        </div>
+      </div>
+
+      <div class="brand-footer">
+        <div class="bf-logo">BiJaDi</div>
+        <div class="bf-sub">Family First</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SPIN WHEEL SCREEN ===== -->
+  <div class="screen" id="screenWheel">
+    <div class="wheel-header">
+      <h2>Spin the Seal</h2>
+      <p>Every Little B.E. scan earns a guaranteed reward</p>
+    </div>
+
+    <div class="wheel-container">
+      <div class="wheel-pointer"></div>
+      <canvas class="wheel-canvas" id="wheelCanvas" width="600" height="600"></canvas>
+      <div class="wheel-center"><span>B.E.</span></div>
+    </div>
+
+    <button class="spin-btn" id="spinBtn" onclick="spinWheel()">Spin the Seal</button>
+
+    <div class="brand-footer">
+      <div class="bf-logo">Little B.E.</div>
+      <div class="bf-sub">Beyond Enough</div>
+    </div>
+  </div>
+
+  <!-- ===== MEMORIES SCREEN ===== -->
+  <div class="screen" id="screenMemories">
+    <div class="memories-header">
+      <h2>Our Little B.E. Moment</h2>
+      <p>Capture a memory or write a letter to be opened in the future</p>
+    </div>
+
+    <div class="memory-tabs">
+      <button class="memory-tab active" onclick="switchMemoryTab('photo', this)">Photo Memory</button>
+      <button class="memory-tab" onclick="switchMemoryTab('letter', this)">Letter Vault</button>
+    </div>
+
+    <!-- PHOTO MEMORY FORM -->
+    <div class="memory-form active" id="memoryPhoto">
+      <div class="form-group">
+        <label class="form-label">Upload a Photo</label>
+        <div class="photo-upload" id="photoUpload" onclick="document.getElementById('photoInput').click()">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Tap to add a photo</span>
+          <input type="file" id="photoInput" accept="image/*" onchange="previewPhoto(this)">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Child's Name</label>
+        <input type="text" class="form-input" placeholder="e.g. Janice" id="childName">
+      </div>
+      <div class="form-group">
+        <label class="form-label">The Moment</label>
+        <input type="text" class="form-input" placeholder="e.g. First day of preschool" id="momentTitle">
+      </div>
+      <div class="form-group">
+        <label class="form-label">A Note (Optional)</label>
+        <textarea class="form-input" placeholder="Write something you want to remember..." id="momentNote"></textarea>
+      </div>
+      <button class="submit-btn" onclick="saveMemory()">Save This Moment</button>
+    </div>
+
+    <!-- LETTER VAULT FORM -->
+    <div class="memory-form" id="memoryLetter">
+      <div class="vault-note">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <p>Your letter will be sealed with a digital gold wax stamp and locked until the date you choose. Only you can unlock it early.</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">To</label>
+        <input type="text" class="form-input" placeholder="Your child's name" id="letterTo">
+      </div>
+      <div class="form-group">
+        <label class="form-label">From</label>
+        <input type="text" class="form-input" placeholder="Mom, Dad, Grandma..." id="letterFrom">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Letter</label>
+        <textarea class="form-input" placeholder="Write from the heart..." id="letterBody" style="min-height:160px;"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Open On</label>
+        <div class="seal-date">
+          <input type="date" class="form-input" id="letterDate">
+        </div>
+      </div>
+      <button class="submit-btn" onclick="saveLetter()">Seal with Gold</button>
+    </div>
+
+    <div class="brand-footer">
+      <div class="bf-logo">Little B.E.</div>
+      <div class="bf-sub">Beyond Enough</div>
+    </div>
+  </div>
+
+  <!-- ===== SHARE SCREEN ===== -->
+  <div class="screen" id="screenShare">
+    <div class="share-header">
+      <h2>B.E. Family Circle</h2>
+      <p>Share your unique code and earn rewards when friends &amp; family shop Little B.E.</p>
+    </div>
+
+    <div class="referral-card">
+      <div class="referral-label">Your Referral Code</div>
+      <div class="referral-code-display" id="referralCode" onclick="copyReferral()">LITTLEBE-FAM-2847</div>
+      <div class="referral-hint">Tap to copy — share anywhere</div>
+    </div>
+
+    <div class="share-tiers">
+      <div class="tier-title">Reward Tiers</div>
+      <div class="tier-item">
+        <div class="tier-count">1</div>
+        <div class="tier-reward">Free Shipping on next order<br><span>Your friend gets 10% off too</span></div>
+      </div>
+      <div class="tier-item">
+        <div class="tier-count">3</div>
+        <div class="tier-reward">15% off any Little B.E. piece<br><span>Unlocks exclusive colorways</span></div>
+      </div>
+      <div class="tier-item">
+        <div class="tier-count">5</div>
+        <div class="tier-reward">Free Little B.E. Beanie<br><span>Plus early access to every drop</span></div>
+      </div>
+      <div class="tier-item">
+        <div class="tier-count">10</div>
+        <div class="tier-reward">VIP Family Circle Member<br><span>Lifetime perks + Bond Collection access</span></div>
+      </div>
+    </div>
+
+    <div class="share-buttons">
+      <button class="share-btn" onclick="shareVia('message')">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Message
+      </button>
+      <button class="share-btn" onclick="shareVia('email')">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Email
+      </button>
+      <button class="share-btn" onclick="shareVia('copy')">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy Link
+      </button>
+      <button class="share-btn" onclick="shareVia('more')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        More
+      </button>
+    </div>
+
+    <div class="brand-footer">
+      <div class="bf-logo">Little B.E.</div>
+      <div class="bf-sub">Beyond Enough</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="nav-bar">
+  <button class="nav-tab active" onclick="goTo('screenHome', this)" data-screen="screenHome">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Home
+  </button>
+  <button class="nav-tab" onclick="goTo('screenWheel', this)" data-screen="screenWheel">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0110 10"/><path d="M12 6v6l4 2"/></svg>
+    Spin
+  </button>
+  <button class="nav-tab" onclick="goTo('screenMemories', this)" data-screen="screenMemories">
+    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+    Memories
+  </button>
+  <button class="nav-tab" onclick="goTo('screenShare', this)" data-screen="screenShare">
+    <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    Share
+  </button>
+</nav>
+
+<script>
+  // ===== LOADING =====
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loadingScreen').classList.add('hidden');
+    }, 2200);
+  });
+
+  // ===== NAVIGATION =====
+  function goTo(screenId, tabEl) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    if (tabEl) {
+      tabEl.classList.add('active');
+    } else {
+      document.querySelectorAll('.nav-tab').forEach(t => {
+        if (t.dataset.screen === screenId) t.classList.add('active');
+      });
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ===== SPIN WHEEL =====
+  const prizes = [
+    { label: '10% Off', color: '#1A1A1A', text: '#C4A265', code: 'LITTLEBE10' },
+    { label: 'Free Ship', color: '#F5F0EB', text: '#1A1A1A', code: 'LITTLEBESHIP' },
+    { label: '15% Off', color: '#8B7D6B', text: '#F5F0EB', code: 'LITTLEBE15' },
+    { label: 'Stickers', color: '#F5F0EB', text: '#1A1A1A', code: 'LITTLEBESTK' },
+    { label: '20% Off', color: '#1A1A1A', text: '#C4A265', code: 'LITTLEBE20' },
+    { label: 'Wallpaper', color: '#F5F0EB', text: '#1A1A1A', code: 'LITTLEBEWP' },
+    { label: 'Free Beanie', color: '#C4A265', text: '#1A1A1A', code: 'LITTLEBEBEAN' },
+    { label: 'Free Ship', color: '#1A1A1A', text: '#C4A265', code: 'LITTLEBESHIP' },
+  ];
+
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx = canvas.getContext('2d');
+  let currentAngle = 0;
+  let spinning = false;
+
+  function drawWheel(angle) {
+    const cx = 300, cy = 300, r = 295;
+    const sliceAngle = (2 * Math.PI) / prizes.length;
+
+    ctx.clearRect(0, 0, 600, 600);
+
+    prizes.forEach((prize, i) => {
+      const start = angle + i * sliceAngle;
+      const end = start + sliceAngle;
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, start, end);
+      ctx.closePath();
+      ctx.fillStyle = prize.color;
+      ctx.fill();
+
+      // Separator lines
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + r * Math.cos(start), cy + r * Math.sin(start));
+      ctx.strokeStyle = 'rgba(196,162,101,0.3)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Text
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(start + sliceAngle / 2);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = prize.text;
+      ctx.font = '600 22px Outfit';
+      ctx.letterSpacing = '2px';
+      ctx.fillText(prize.label, r - 30, 7);
+      ctx.restore();
+    });
+  }
+
+  drawWheel(0);
+
+  function spinWheel() {
+    if (spinning) return;
+    spinning = true;
+    document.getElementById('spinBtn').disabled = true;
+    document.getElementById('spinBtn').textContent = 'Spinning...';
+
+    const winIndex = Math.floor(Math.random() * prizes.length);
+    const sliceAngle = (2 * Math.PI) / prizes.length;
+    // We want the winning slice to be at the top (where the pointer is, which is at -PI/2)
+    // The slice center is at winIndex * sliceAngle + sliceAngle/2
+    // We need to rotate so that the pointer at -PI/2 points to the middle of the winning slice
+    const targetAngle = -(winIndex * sliceAngle + sliceAngle / 2) - Math.PI / 2;
+    const totalSpin = targetAngle - currentAngle + (2 * Math.PI * (5 + Math.random() * 3));
+
+    const startTime = performance.now();
+    const duration = 4000;
+
+    function animate(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const angle = currentAngle + totalSpin * eased;
+
+      drawWheel(angle);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        currentAngle = currentAngle + totalSpin;
+        spinning = false;
+        showPrize(prizes[winIndex]);
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+
+  function showPrize(prize) {
+    document.getElementById('prizeName').textContent = prize.label;
+    document.getElementById('prizeCode').textContent = prize.code;
+    document.getElementById('prizeModal').classList.add('show');
+    launchConfetti();
+
+    document.getElementById('spinBtn').textContent = 'Claimed!';
+    document.getElementById('spinBtn').style.background = 'var(--gold)';
+    document.getElementById('spinBtn').style.color = 'var(--black)';
+  }
+
+  function closeModal() {
+    document.getElementById('prizeModal').classList.remove('show');
+  }
+
+  function copyCode(el) {
+    navigator.clipboard.writeText(el.textContent).then(() => {
+      showToast('Code copied!');
+    });
+  }
+
+  // ===== CONFETTI =====
+  function launchConfetti() {
+    const container = document.getElementById('confetti');
+    const colors = ['#C4A265', '#D4B87A', '#F5F0EB', '#8B7D6B', '#1A1A1A'];
+    for (let i = 0; i < 60; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.width = (4 + Math.random() * 8) + 'px';
+      piece.style.height = (4 + Math.random() * 8) + 'px';
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+      piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+      piece.style.animationDelay = Math.random() * 0.5 + 's';
+      container.appendChild(piece);
+    }
+    setTimeout(() => { container.innerHTML = ''; }, 5000);
+  }
+
+  // ===== MEMORIES =====
+  function switchMemoryTab(tab, el) {
+    document.querySelectorAll('.memory-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.memory-form').forEach(f => f.classList.remove('active'));
+    if (tab === 'photo') {
+      document.getElementById('memoryPhoto').classList.add('active');
+    } else {
+      document.getElementById('memoryLetter').classList.add('active');
+    }
+  }
+
+  function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const upload = document.getElementById('photoUpload');
+        // Remove existing preview
+        const existing = upload.querySelector('img');
+        if (existing) existing.remove();
+
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        upload.appendChild(img);
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function saveMemory() {
+    const name = document.getElementById('childName').value;
+    const moment = document.getElementById('momentTitle').value;
+    if (!name || !moment) {
+      showToast('Please fill in the name and moment');
+      return;
+    }
+    // Replace form with success
+    const form = document.getElementById('memoryPhoto');
+    form.innerHTML = `
+      <div class="success-message">
+        <div class="check-circle">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Moment Saved</h3>
+        <p>${name}'s "${moment}" is now part of their Little B.E. story. You can view all moments in your account.</p>
+      </div>
+    `;
+  }
+
+  function saveLetter() {
+    const to = document.getElementById('letterTo').value;
+    const from = document.getElementById('letterFrom').value;
+    const body = document.getElementById('letterBody').value;
+    const date = document.getElementById('letterDate').value;
+    if (!to || !body || !date) {
+      showToast('Please fill in all required fields');
+      return;
+    }
+    const openDate = new Date(date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const form = document.getElementById('memoryLetter');
+    form.innerHTML = `
+      <div class="success-message">
+        <div class="check-circle">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        </div>
+        <h3>Letter Sealed</h3>
+        <p>Your letter to ${to} from ${from} has been sealed with a gold stamp. It will be ready to open on ${openDate}.</p>
+      </div>
+    `;
+  }
+
+  // ===== SHARE / REFERRAL =====
+  function copyReferral() {
+    const code = document.getElementById('referralCode').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      showToast('Referral code copied!');
+    });
+  }
+
+  function shareVia(method) {
+    const code = document.getElementById('referralCode').textContent;
+    const url = `https://lilbe.bijadi.com/ref/${code}`;
+    const text = `Shop Little B.E. — luxury streetwear for little ones. Use my code ${code} for 10% off your first order.`;
+
+    if (method === 'copy') {
+      navigator.clipboard.writeText(url).then(() => showToast('Link copied!'));
+    } else if (method === 'message' && navigator.share) {
+      navigator.share({ title: 'Little B.E.', text: text, url: url }).catch(() => {});
+    } else if (method === 'email') {
+      window.location.href = `mailto:?subject=Check out Little B.E.&body=${encodeURIComponent(text + '\n\n' + url)}`;
+    } else if (method === 'more' && navigator.share) {
+      navigator.share({ title: 'Little B.E.', text: text, url: url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url).then(() => showToast('Link copied!'));
+    }
+  }
+
+  // ===== TOAST =====
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>
