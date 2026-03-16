@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BiJaDi — Shop</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bk:#F5F0EB;--ch:#EDE6DE;--sm:#E2D9CF;--gr:#B8AFA5;--pw:#8B7D6B;--st:#6B5E4F;
+  --iv:#1A1A1A;--rg:#A0846E;--cm:#C4A882;--gold:#C4A265;--ww:#FAF8F5;
+  --fd:'Cormorant Garamond',Georgia,serif;--fb:'Outfit','Helvetica Neue',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bk);color:var(--iv);-webkit-font-smoothing:antialiased}
+
+/* NAV */
+.shop-nav{position:sticky;top:0;z-index:100;background:rgba(245,240,235,.95);backdrop-filter:blur(16px);border-bottom:1px solid rgba(160,132,110,.08);padding:1.25rem 2rem;display:flex;justify-content:space-between;align-items:center}
+.shop-logo{font-family:var(--fd);font-size:1.4rem;font-weight:300;letter-spacing:.25em;color:var(--iv);text-decoration:none}
+.shop-logo span{color:var(--rg)}
+.cart-btn{position:relative;background:none;border:1px solid var(--gr);border-radius:4px;padding:8px 18px;font-family:var(--fb);font-size:.7rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--iv);cursor:pointer;transition:all .25s}
+.cart-btn:hover{background:var(--iv);color:var(--bk);border-color:var(--iv)}
+.cart-count{position:absolute;top:-6px;right:-6px;background:var(--gold);color:var(--iv);width:18px;height:18px;border-radius:50%;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;display:none}
+.cart-count.show{display:flex}
+
+/* HERO */
+.shop-hero{text-align:center;padding:5rem 2rem 3rem}
+.shop-hero .sl{font-size:.6rem;font-weight:500;letter-spacing:.4em;text-transform:uppercase;color:var(--rg);margin-bottom:1rem}
+.shop-hero h1{font-family:var(--fd);font-size:clamp(2rem,4vw,3rem);font-weight:300;color:var(--iv);margin-bottom:.5rem}
+.shop-hero p{font-size:.85rem;font-weight:300;color:var(--pw);max-width:500px;margin:0 auto;line-height:1.7}
+.preorder-badge{display:inline-block;background:var(--iv);color:var(--gold);font-size:.6rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;padding:6px 18px;border-radius:2px;margin-top:1.25rem}
+
+/* COLLECTION TABS */
+.collection-tabs{display:flex;justify-content:center;gap:0;margin:0 2rem 3rem;border:1px solid var(--sm);border-radius:4px;overflow:hidden;max-width:400px;margin-left:auto;margin-right:auto}
+.col-tab{flex:1;padding:12px 24px;background:var(--ww);border:none;font-family:var(--fb);font-size:.7rem;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--pw);cursor:pointer;transition:all .25s}
+.col-tab.active{background:var(--iv);color:var(--bk)}
+
+/* PRODUCT GRID */
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:2rem;padding:0 2rem 4rem;max-width:1200px;margin:0 auto}
+.product-card{background:var(--ww);border:1px solid rgba(160,132,110,.08);border-radius:8px;overflow:hidden;transition:all .35s}
+.product-card:hover{box-shadow:0 12px 40px rgba(139,125,107,.1);transform:translateY(-4px)}
+.product-img{width:100%;aspect-ratio:3/4;background:var(--ch);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:2.5rem;font-weight:300;color:var(--sm);font-style:italic;position:relative}
+.product-img .status-tag{position:absolute;top:16px;left:16px;background:var(--iv);color:var(--gold);font-family:var(--fb);font-size:.55rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;padding:5px 12px;border-radius:2px}
+.product-info{padding:1.5rem}
+.product-collection{font-size:.6rem;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:var(--rg);margin-bottom:.4rem}
+.product-name{font-family:var(--fd);font-size:1.2rem;font-weight:500;color:var(--iv);margin-bottom:.3rem}
+.product-desc{font-size:.75rem;font-weight:300;color:var(--pw);line-height:1.6;margin-bottom:1rem;min-height:40px}
+.product-price{font-family:var(--fd);font-size:1.4rem;font-weight:600;color:var(--iv);margin-bottom:1.25rem}
+.product-price .preorder-note{display:block;font-family:var(--fb);font-size:.6rem;font-weight:300;color:var(--rg);letter-spacing:.04em;margin-top:2px}
+
+/* Selectors */
+.selector-row{display:flex;gap:12px;margin-bottom:12px}
+.selector-group{flex:1}
+.selector-label{font-size:.6rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--pw);margin-bottom:6px}
+.selector-options{display:flex;flex-wrap:wrap;gap:6px}
+.opt-btn{padding:6px 12px;background:var(--bk);border:1px solid var(--sm);border-radius:3px;font-family:var(--fb);font-size:.7rem;font-weight:400;color:var(--st);cursor:pointer;transition:all .2s}
+.opt-btn:hover{border-color:var(--rg)}
+.opt-btn.selected{background:var(--iv);color:var(--bk);border-color:var(--iv)}
+
+.add-btn{width:100%;padding:14px;background:var(--iv);color:var(--bk);border:none;border-radius:4px;font-family:var(--fb);font-size:.75rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;margin-top:8px}
+.add-btn:hover{background:var(--st)}
+.add-btn::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.add-btn.added{background:var(--gold);color:var(--iv)}
+
+/* CART DRAWER */
+.cart-overlay{position:fixed;inset:0;background:rgba(26,26,26,.6);backdrop-filter:blur(6px);z-index:200;opacity:0;visibility:hidden;transition:all .3s}
+.cart-overlay.open{opacity:1;visibility:visible}
+.cart-drawer{position:fixed;top:0;right:0;bottom:0;width:100%;max-width:420px;background:var(--bk);z-index:201;transform:translateX(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column}
+.cart-drawer.open{transform:translateX(0)}
+.cart-header{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 1.5rem 1rem;border-bottom:1px solid var(--sm)}
+.cart-header h2{font-family:var(--fd);font-size:1.4rem;font-weight:500}
+.cart-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--pw);padding:4px}
+.cart-items{flex:1;overflow-y:auto;padding:1rem 1.5rem}
+.cart-empty{text-align:center;padding:4rem 2rem;color:var(--pw);font-size:.85rem;font-weight:300}
+.cart-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(160,132,110,.08)}
+.cart-item-img{width:60px;height:80px;background:var(--ch);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:.9rem;color:var(--sm);flex-shrink:0}
+.cart-item-info{flex:1}
+.cart-item-name{font-family:var(--fd);font-size:.95rem;font-weight:500;color:var(--iv)}
+.cart-item-detail{font-size:.7rem;font-weight:300;color:var(--pw);margin-top:2px}
+.cart-item-price{font-size:.85rem;font-weight:500;color:var(--iv);margin-top:4px}
+.cart-item-remove{background:none;border:none;font-size:.65rem;color:var(--rg);cursor:pointer;margin-top:4px;text-transform:uppercase;letter-spacing:.1em}
+
+/* Discount */
+.cart-discount{padding:0 1.5rem 1rem}
+.discount-row{display:flex;gap:8px}
+.discount-input{flex:1;padding:10px 14px;border:1px solid var(--sm);border-radius:4px;font-family:var(--fb);font-size:.8rem;background:var(--ww);outline:none}
+.discount-input:focus{border-color:var(--gold)}
+.discount-apply{padding:10px 18px;background:var(--iv);color:var(--bk);border:none;border-radius:4px;font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+
+/* Cart footer */
+.cart-footer{padding:1.25rem 1.5rem;border-top:1px solid var(--sm);background:var(--ww)}
+.cart-total{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.cart-total-label{font-size:.75rem;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--pw)}
+.cart-total-amount{font-family:var(--fd);font-size:1.6rem;font-weight:600;color:var(--iv)}
+
+/* Payment method selector */
+.pay-methods{display:flex;gap:8px;margin-bottom:12px}
+.pay-method{flex:1;padding:10px;background:var(--bk);border:1px solid var(--sm);border-radius:4px;font-family:var(--fb);font-size:.65rem;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:var(--pw);cursor:pointer;transition:all .2s;text-align:center}
+.pay-method.active{background:var(--iv);color:var(--gold);border-color:var(--iv)}
+.pay-method svg{display:block;margin:0 auto 4px;width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5}
+
+.checkout-btn{width:100%;padding:16px;background:var(--iv);color:var(--bk);border:none;border-radius:4px;font-family:var(--fb);font-size:.8rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.checkout-btn:hover{background:var(--st)}
+.checkout-btn:disabled{opacity:.5;cursor:not-allowed}
+.checkout-btn.crypto{background:var(--gold);color:var(--iv)}
+
+/* CRYPTO MODAL */
+.crypto-modal{position:fixed;inset:0;background:rgba(26,26,26,.85);backdrop-filter:blur(8px);z-index:300;display:none;align-items:center;justify-content:center;padding:24px}
+.crypto-modal.show{display:flex}
+.crypto-box{background:var(--bk);border:1px solid var(--gold);border-radius:8px;padding:32px 28px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto}
+.crypto-box h3{font-family:var(--fd);font-size:1.4rem;font-weight:500;text-align:center;margin-bottom:4px}
+.crypto-box .crypto-sub{font-size:.75rem;font-weight:300;color:var(--pw);text-align:center;margin-bottom:20px;line-height:1.5}
+.crypto-box .order-ref{text-align:center;background:var(--iv);color:var(--gold);padding:8px 16px;border-radius:4px;font-family:var(--fb);font-size:.75rem;font-weight:600;letter-spacing:.1em;margin-bottom:20px;display:inline-block}
+.wallet-option{padding:14px;background:var(--ww);border:1px solid var(--sm);border-radius:6px;margin-bottom:10px;cursor:pointer;transition:all .2s}
+.wallet-option:hover{border-color:var(--gold)}
+.wallet-option.expanded{border-color:var(--gold);background:var(--ch)}
+.wallet-header{display:flex;justify-content:space-between;align-items:center}
+.wallet-name{font-size:.8rem;font-weight:500;color:var(--iv)}
+.wallet-network{font-size:.6rem;font-weight:300;color:var(--rg);letter-spacing:.1em;text-transform:uppercase}
+.wallet-details{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--sm)}
+.wallet-option.expanded .wallet-details{display:block}
+.wallet-address{font-family:'Courier New',monospace;font-size:.65rem;color:var(--st);word-break:break-all;background:var(--bk);padding:10px;border-radius:4px;border:1px solid var(--sm);margin-bottom:8px;cursor:pointer;transition:background .2s}
+.wallet-address:hover{background:var(--sm)}
+.wallet-hint{font-size:.6rem;font-weight:300;color:var(--pw);text-align:center}
+.wallet-amount{font-family:var(--fd);font-size:1.1rem;font-weight:600;color:var(--iv);text-align:center;margin-bottom:8px}
+.crypto-note{font-size:.65rem;font-weight:300;color:var(--pw);line-height:1.5;margin-top:16px;padding:12px;background:rgba(196,162,101,.06);border:1px solid rgba(196,162,101,.15);border-radius:4px}
+.crypto-close{display:block;width:100%;padding:12px;margin-top:16px;background:none;border:1px solid var(--iv);border-radius:4px;font-family:var(--fb);font-size:.7rem;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--iv);cursor:pointer;text-align:center}
+.crypto-close:hover{background:var(--iv);color:var(--bk)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--iv);color:var(--bk);padding:12px 24px;border-radius:4px;font-size:.75rem;opacity:0;transition:all .3s;z-index:400;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* FOOTER */
+.shop-footer{text-align:center;padding:3rem 2rem;border-top:1px solid var(--sm)}
+.shop-footer .bf-logo{font-family:var(--fd);font-size:.8rem;font-weight:600;letter-spacing:.2em;color:var(--iv)}
+.shop-footer .bf-sub{font-size:.55rem;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:var(--gr);margin-top:3px}
+
+/* LOADING */
+.loading-products{text-align:center;padding:4rem;color:var(--pw);font-size:.8rem;font-weight:300}
+
+@media(max-width:768px){
+  .products-grid{grid-template-columns:1fr;padding:0 1rem 3rem}
+  .shop-hero{padding:3rem 1.5rem 2rem}
+  .cart-drawer{max-width:100%}
+}
+</style>
+</head>
+<body>
+
+<nav class="shop-nav">
+  <a href="#" class="shop-logo">Bi<span>Ja</span>Di</a>
+  <button class="cart-btn" onclick="toggleCart()">
+    Cart <span class="cart-count" id="cartCount">0</span>
+  </button>
+</nav>
+
+<div class="shop-hero">
+  <div class="sl">Pre-Order Collection</div>
+  <h1>Beyond Enough.</h1>
+  <p>Elevated luxury streetwear for the family. Every piece is a quiet statement — softly subtle, quietly empowering.</p>
+  <div class="preorder-badge">Shipping Spring 2026</div>
+</div>
+
+<div class="collection-tabs">
+  <button class="col-tab active" onclick="filterCollection('all',this)">All</button>
+  <button class="col-tab" onclick="filterCollection('B.E.',this)">B.E.</button>
+  <button class="col-tab" onclick="filterCollection('Little B.E.',this)">Little B.E.</button>
+</div>
+
+<div class="products-grid" id="productsGrid">
+  <div class="loading-products">Loading collection...</div>
+</div>
+
+<!-- CART OVERLAY -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+
+<!-- CART DRAWER -->
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <h2>Your Bag</h2>
+    <button class="cart-close" onclick="toggleCart()">&times;</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">Your bag is empty</div>
+  </div>
+  <div class="cart-discount" id="cartDiscountSection" style="display:none">
+    <div class="discount-row">
+      <input class="discount-input" id="discountInput" placeholder="Discount code" />
+      <button class="discount-apply" onclick="applyDiscount()">Apply</button>
+    </div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-amount" id="cartTotal">$0</span>
+    </div>
+    <div class="pay-methods">
+      <button class="pay-method active" onclick="selectPayMethod('stripe',this)">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Card
+      </button>
+      <button class="pay-method" onclick="selectPayMethod('coinbase',this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M6 12h12"/></svg>
+        Crypto
+      </button>
+    </div>
+    <button class="checkout-btn" id="checkoutBtn" onclick="checkout()">Pre-Order Now</button>
+  </div>
+</div>
+
+<!-- CRYPTO PAYMENT MODAL -->
+<div class="crypto-modal" id="cryptoModal">
+  <div class="crypto-box">
+    <h3>Pay with Crypto</h3>
+    <div class="crypto-sub">Send the exact amount to one of the wallets below. Include your order number in the memo/note if possible.</div>
+    <div style="text-align:center"><span class="order-ref" id="cryptoOrderRef">—</span></div>
+    <div class="wallet-amount" id="cryptoAmount">$0.00 USD equivalent</div>
+
+    <div class="wallet-option" onclick="toggleWallet(this)">
+      <div class="wallet-header"><span class="wallet-name">Bitcoin (BTC)</span><span class="wallet-network">Bitcoin Network</span></div>
+      <div class="wallet-details">
+        <div class="wallet-address" onclick="copyAddr(this)">bc1qqx96qv6uj06tcyfvg38rkc5kwkw77z0cqreqle</div>
+        <div class="wallet-hint">Tap address to copy</div>
+      </div>
+    </div>
+    <div class="wallet-option" onclick="toggleWallet(this)">
+      <div class="wallet-header"><span class="wallet-name">Ethereum (ETH)</span><span class="wallet-network">Ethereum Mainnet</span></div>
+      <div class="wallet-details">
+        <div class="wallet-address" onclick="copyAddr(this)">0x45aa0128101bbbE5d56B4e22f7a22364125FA159</div>
+        <div class="wallet-hint">Tap address to copy</div>
+      </div>
+    </div>
+    <div class="wallet-option" onclick="toggleWallet(this)">
+      <div class="wallet-header"><span class="wallet-name">Solana (SOL)</span><span class="wallet-network">Solana Network</span></div>
+      <div class="wallet-details">
+        <div class="wallet-address" onclick="copyAddr(this)">65Uqk418Pi8Tz9fn3kEE8s3t4daHk1EcBfSnswHfJWYB</div>
+        <div class="wallet-hint">Tap address to copy</div>
+      </div>
+    </div>
+    <div class="wallet-option" onclick="toggleWallet(this)">
+      <div class="wallet-header"><span class="wallet-name">USDC / ETH</span><span class="wallet-network">Base Network</span></div>
+      <div class="wallet-details">
+        <div class="wallet-address" onclick="copyAddr(this)">0x45aa0128101bbbE5d56B4e22f7a22364125FA159</div>
+        <div class="wallet-hint">Tap address to copy — Base network USDC preferred</div>
+      </div>
+    </div>
+    <div class="wallet-option" onclick="toggleWallet(this)">
+      <div class="wallet-header"><span class="wallet-name">USDC / MATIC</span><span class="wallet-network">Polygon Network</span></div>
+      <div class="wallet-details">
+        <div class="wallet-address" onclick="copyAddr(this)">0x45aa0128101bbbE5d56B4e22f7a22364125FA159</div>
+        <div class="wallet-hint">Tap address to copy</div>
+      </div>
+    </div>
+    <div class="wallet-option" onclick="toggleWallet(this)">
+      <div class="wallet-header"><span class="wallet-name">TRON (TRX)</span><span class="wallet-network">Tron Network</span></div>
+      <div class="wallet-details">
+        <div class="wallet-address" onclick="copyAddr(this)">TVpSZAE5968uCWg14Eu9ZX8hyb8FeKSG3Q</div>
+        <div class="wallet-hint">Tap address to copy</div>
+      </div>
+    </div>
+
+    <div class="crypto-note">
+      After sending, email <strong>orders@bijadi.com</strong> with your order number and transaction hash/ID. We'll confirm your order within 24 hours once payment is verified on-chain. Free shipping on all pre-orders.
+    </div>
+    <button class="crypto-close" onclick="closeCrypto()">Done</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer class="shop-footer">
+  <div class="bf-logo">BiJaDi</div>
+  <div class="bf-sub">Family First — Beyond Enough</div>
+</footer>
+
+<script>
+const API = 'https://hvdxrbomlvcxdpehaqri.supabase.co/functions/v1';
+let allProducts = [];
+let cart = [];
+let selectedPayMethod = 'stripe';
+let discountCode = '';
+
+// ===== LOAD PRODUCTS =====
+async function loadProducts() {
+  try {
+    const res = await fetch(`${API}/products`);
+    const data = await res.json();
+    allProducts = data.products || [];
+    renderProducts(allProducts);
+  } catch (e) {
+    document.getElementById('productsGrid').innerHTML = '<div class="loading-products">Unable to load products. Please refresh.</div>';
+  }
+}
+
+function renderProducts(products) {
+  const grid = document.getElementById('productsGrid');
+  if (!products.length) { grid.innerHTML = '<div class="loading-products">No products found.</div>'; return; }
+
+  grid.innerHTML = products.map(p => {
+    const sizes = (p.sizes || []).map(s => `<button class="opt-btn" onclick="selectOpt(this)">${s}</button>`).join('');
+    const colors = (p.colors || []).map(c => `<button class="opt-btn" onclick="selectOpt(this)">${c}</button>`).join('');
+    const price = (p.price_cents / 100).toFixed(0);
+
+    return `
+    <div class="product-card" data-slug="${p.slug}" data-collection="${p.collection}">
+      <div class="product-img">
+        <span class="status-tag">${p.status === 'preorder' ? 'Pre-Order' : 'Shop Now'}</span>
+        B.E.
+      </div>
+      <div class="product-info">
+        <div class="product-collection">${p.collection}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-desc">${p.description || ''}</div>
+        <div class="product-price">$${price}<span class="preorder-note">${p.preorder_message || ''}</span></div>
+        <div class="selector-row">
+          ${sizes ? `<div class="selector-group"><div class="selector-label">Size</div><div class="selector-options" data-type="size">${sizes}</div></div>` : ''}
+          ${colors ? `<div class="selector-group"><div class="selector-label">Color</div><div class="selector-options" data-type="color">${colors}</div></div>` : ''}
+        </div>
+        <button class="add-btn" onclick="addToCart('${p.slug}', this)">Add to Bag</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterCollection(col, el) {
+  document.querySelectorAll('.col-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const filtered = col === 'all' ? allProducts : allProducts.filter(p => p.collection === col);
+  renderProducts(filtered);
+}
+
+function selectOpt(btn) {
+  const group = btn.closest('.selector-options');
+  group.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// ===== CART =====
+function addToCart(slug, btn) {
+  const card = btn.closest('.product-card');
+  const sizeEl = card.querySelector('[data-type="size"] .opt-btn.selected');
+  const colorEl = card.querySelector('[data-type="color"] .opt-btn.selected');
+
+  if (card.querySelector('[data-type="size"]') && !sizeEl) { showToast('Please select a size'); return; }
+  if (card.querySelector('[data-type="color"]') && !colorEl) { showToast('Please select a color'); return; }
+
+  const product = allProducts.find(p => p.slug === slug);
+  if (!product) return;
+
+  const size = sizeEl ? sizeEl.textContent : null;
+  const color = colorEl ? colorEl.textContent : null;
+
+  // Check if already in cart
+  const existing = cart.find(i => i.slug === slug && i.size === size && i.color === color);
+  if (existing) { existing.quantity = Math.min(existing.quantity + 1, 10); }
+  else { cart.push({ slug, name: product.name, size, color, quantity: 1, price_cents: product.price_cents }); }
+
+  btn.textContent = 'Added!';
+  btn.classList.add('added');
+  setTimeout(() => { btn.textContent = 'Add to Bag'; btn.classList.remove('added'); }, 1500);
+
+  updateCartUI();
+}
+
+function removeFromCart(idx) {
+  cart.splice(idx, 1);
+  updateCartUI();
+}
+
+function updateCartUI() {
+  const countEl = document.getElementById('cartCount');
+  const itemsEl = document.getElementById('cartItems');
+  const totalEl = document.getElementById('cartTotal');
+  const footerEl = document.getElementById('cartFooter');
+  const discountEl = document.getElementById('cartDiscountSection');
+
+  const totalQty = cart.reduce((s, i) => s + i.quantity, 0);
+  countEl.textContent = totalQty;
+  countEl.classList.toggle('show', totalQty > 0);
+  footerEl.style.display = totalQty > 0 ? 'block' : 'none';
+  discountEl.style.display = totalQty > 0 ? 'block' : 'none';
+
+  if (!cart.length) {
+    itemsEl.innerHTML = '<div class="cart-empty">Your bag is empty</div>';
+    return;
+  }
+
+  const subtotal = cart.reduce((s, i) => s + i.price_cents * i.quantity, 0);
+  totalEl.textContent = `$${(subtotal / 100).toFixed(0)}`;
+
+  itemsEl.innerHTML = cart.map((item, idx) => `
+    <div class="cart-item">
+      <div class="cart-item-img">B.E.</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-detail">${item.size || ''} ${item.color ? '/ ' + item.color : ''} — Qty: ${item.quantity}</div>
+        <div class="cart-item-price">$${(item.price_cents * item.quantity / 100).toFixed(0)}</div>
+        <button class="cart-item-remove" onclick="removeFromCart(${idx})">Remove</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleCart() {
+  document.getElementById('cartOverlay').classList.toggle('open');
+  document.getElementById('cartDrawer').classList.toggle('open');
+}
+
+// ===== PAYMENT =====
+function selectPayMethod(method, el) {
+  selectedPayMethod = method;
+  document.querySelectorAll('.pay-method').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const btn = document.getElementById('checkoutBtn');
+  if (method === 'coinbase') {
+    btn.textContent = 'Pay with Crypto';
+    btn.classList.add('crypto');
+  } else {
+    btn.textContent = 'Pre-Order Now';
+    btn.classList.remove('crypto');
+  }
+}
+
+async function checkout() {
+  if (!cart.length) return;
+
+  const btn = document.getElementById('checkoutBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  // For crypto manual payment, show the wallet modal directly
+  if (selectedPayMethod === 'coinbase') {
+    // Create a manual order
+    try {
+      const res = await fetch(`${API}/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cart.map(i => ({ slug: i.slug, size: i.size, color: i.color, quantity: i.quantity })),
+          customer: { email: 'crypto-pending@bijadi.com', name: 'Crypto Customer' },
+          payment_method: 'stripe', // Create order via stripe path but we'll show crypto modal
+          discount_code: discountCode || undefined,
+        }),
+      });
+      const data = await res.json();
+      // Show crypto modal with order info
+      const subtotal = cart.reduce((s, i) => s + i.price_cents * i.quantity, 0);
+      document.getElementById('cryptoOrderRef').textContent = data.order_number || 'BIJADI-CRYPTO';
+      document.getElementById('cryptoAmount').textContent = `$${(subtotal / 100).toFixed(2)} USD equivalent`;
+      document.getElementById('cryptoModal').classList.add('show');
+    } catch (e) {
+      const subtotal = cart.reduce((s, i) => s + i.price_cents * i.quantity, 0);
+      document.getElementById('cryptoOrderRef').textContent = 'Pending';
+      document.getElementById('cryptoAmount').textContent = `$${(subtotal / 100).toFixed(2)} USD equivalent`;
+      document.getElementById('cryptoModal').classList.add('show');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Pay with Crypto';
+    return;
+  }
+
+  // Stripe checkout
+  const email = prompt('Enter your email for order confirmation:');
+  if (!email) { btn.disabled = false; btn.textContent = 'Pre-Order Now'; return; }
+  const name = prompt('Your full name:');
+  if (!name) { btn.disabled = false; btn.textContent = 'Pre-Order Now'; return; }
+
+  try {
+    const res = await fetch(`${API}/checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: cart.map(i => ({ slug: i.slug, size: i.size, color: i.color, quantity: i.quantity })),
+        customer: { email, name },
+        payment_method: 'stripe',
+        discount_code: discountCode || undefined,
+      }),
+    });
+    const data = await res.json();
+    if (data.success && data.checkout_url) {
+      window.location.href = data.checkout_url;
+    } else {
+      showToast(data.error || 'Checkout failed. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Pre-Order Now';
+    }
+  } catch (e) {
+    showToast('Connection error. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Pre-Order Now';
+  }
+}
+
+function applyDiscount() {
+  discountCode = document.getElementById('discountInput').value.trim();
+  if (discountCode) showToast(`Code "${discountCode}" will be applied at checkout`);
+}
+
+// ===== CRYPTO MODAL =====
+function toggleWallet(el) {
+  el.classList.toggle('expanded');
+}
+function copyAddr(el) {
+  navigator.clipboard.writeText(el.textContent.trim()).then(() => showToast('Address copied!'));
+}
+function closeCrypto() {
+  document.getElementById('cryptoModal').classList.remove('show');
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== INIT =====
+loadProducts();
+</script>
+</body>
+</html>
