@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BiJaDi — Beyond Enough.</title>
+<meta name="description" content="BiJaDi is a family-focused luxury lifestyle brand rooted in grace, strength, and unapologetic elegance. Beyond Enough.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  /* Product images in capsule — smaller, contained, centered */
+.product-img {
+  max-width: 420px;
+  margin: 3rem auto 1.5rem;
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(160,132,110,0.08);
+}
+:root {
+  --bk:#F5F0EB; --ch:#EDE6DE; --sm:#E2D9CF; --gr:#B8AFA5; --pw:#8B7D6B; --st:#6B5E4F;
+  --iv:#1A1A1A; --rg:#A0846E; --rgb:#8B7360; --cm:#C4A882; --de:#5E7E6B; --dw:#7A5C4A; --mg:#B89A5A;
+  --fd:'Cormorant Garamond',Georgia,serif; --fb:'Outfit','Helvetica Neue',sans-serif;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; font-size:16px; }
+body {
+  font-family:var(--fb); background:var(--bk); color:var(--iv); overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before {
+  content:''; position:fixed; inset:0; z-index:9999; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:.15;
+}
+
+/* IMPROVED IMAGE HANDLING */
+img {
+  width:100%; height:auto; object-fit:contain; object-position:center;
+  display:block; max-height:100%; 
+}
+.background-image-container,
+section[style*="background-image"],
+.mf-v, .hero-bg, .collage-bg {
+  background-size:contain !important;
+  background-position:center !important;
+  background-repeat:no-repeat !important;
+}
+
+/* NAV */
+.nav {
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:1.5rem 3rem; transition:all .4s;
+}
+.nav.scrolled {
+  background:rgba(245,240,235,.92); backdrop-filter:blur(20px);
+  box-shadow:0 1px 20px rgba(139,125,107,.08);
+}
+.nav-logo {
+  font-family:var(--fd); font-size:1.6rem; font-weight:300;
+  letter-spacing:.25em; color:var(--iv); text-decoration:none;
+}
+.nav-logo span { color:var(--rg); }
+.nav-links { display:flex; gap:2.5rem; list-style:none; }
+.nav-links a {
+  font-size:.7rem; font-weight:400; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--st); text-decoration:none;
+  transition:color .3s; position:relative;
+}
+.nav-links a::after {
+  content:''; position:absolute; bottom:-4px; left:0; width:0; height:1px;
+  background:var(--rg); transition:width .3s;
+}
+.nav-links a:hover { color:var(--iv); }
+.nav-links a:hover::after { width:100%; }
+.nav-toggle { display:none; background:none; border:none; cursor:pointer; padding:.5rem; z-index:1001; }
+.nav-toggle span {
+  display:block; width:24px; height:1px; background:var(--iv);
+  margin:6px 0; transition:all .3s;
+}
+
+/* SHARED */
+.section { padding:7rem 3rem; position:relative; }
+.sl {
+  font-size:.6rem; font-weight:500; letter-spacing:.4em;
+  text-transform:uppercase; color:var(--rg); margin-bottom:1.25rem;
+}
+.sh {
+  font-family:var(--fd); font-size:clamp(2rem,4vw,3.2rem);
+  font-weight:300; line-height:1.2; color:var(--iv); margin-bottom:1.25rem;
+}
+.st { font-size:.9rem; font-weight:300; line-height:1.8; color:var(--st); max-width:580px; }
+.divider { width:50px; height:1px; background:linear-gradient(to right,var(--rg),transparent); margin:1.75rem 0; }
+.inner { max-width:1200px; margin:0 auto; }
+.rv { opacity:0; transform:translateY(40px); transition:opacity .8s ease,transform .8s ease; }
+.rv.v { opacity:1; transform:translateY(0); }
+
+/* MANIFESTO */
+.mf {
+  background:var(--ch); display:grid; grid-template-columns:1fr 1fr; gap:0; padding:0;
+}
+.mf-c {
+  padding:6rem 5rem; display:flex; flex-direction:column; justify-content:center;
+}
+.mf-v {
+  position:relative; min-height:650px;
+  background:linear-gradient(155deg,var(--sm) 0%,var(--dw) 60%,var(--ch) 100%);
+  overflow:hidden; background-size:contain !important; background-position:center top !important;
+}
+.mf-v::before {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 50px,rgba(160,132,110,.04) 50px,rgba(160,132,110,.04) 51px);
+}
+.mf-vt {
+  position:absolute; bottom:3rem; right:3.5rem;
+  font-family:var(--fd); font-size:6.5rem; font-weight:300; font-style:italic;
+  color:rgba(160,132,110,.12); line-height:.9; text-align:right;
+}
+.mirror {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:120px; height:180px; border:1px solid rgba(160,132,110,.15);
+  border-radius:60px 60px 0 0;
+}
+.mirror::after {
+  content:'◇'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-size:1.5rem; color:rgba(160,132,110,.2);
+}
+.pg { display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; margin-top:2.5rem; }
+.pl { padding:1.75rem 0; border-top:1px solid rgba(160,132,110,.12); }
+.pl h4 { font-family:var(--fd); font-size:1.2rem; font-weight:400; color:var(--iv); margin-bottom:.6rem; }
+.pl p { font-size:.8rem; font-weight:300; line-height:1.7; color:var(--pw); }
+
+/* CAPSULE INTRO */
+.ci { background:var(--bk); text-align:center; padding:6rem 3rem; }
+
+/* CAROUSEL */
+.carousel-wrap { position:relative; margin-top:3rem; }
+.carousel {
+  display:flex; gap:2rem; overflow-x:auto; scroll-snap-type:x mandatory;
+  scroll-behavior:smooth; -webkit-overflow-scrolling:touch;
+  padding:1rem 0 2rem; scrollbar-width:none;
+}
+.carousel::-webkit-scrollbar { display:none; }
+.carousel-card {
+  flex:0 0 320px; scroll-snap-align:center; text-align:center;
+  background:var(--ch); border-radius:12px; padding:2rem 1.5rem 2.5rem;
+  transition:transform .4s ease, box-shadow .4s ease;
+  position:relative;
+}
+.carousel-card:first-child { margin-left:auto; }
+.carousel-card:last-child { margin-right:auto; }
+.carousel-card:hover {
+  transform:translateY(-6px);
+  box-shadow:0 16px 40px rgba(139,125,107,.12);
+}
+.carousel-card img {
+  width:100%; max-width:280px; height:380px; object-fit:contain;
+  margin:0 auto 1.5rem; display:block; border-radius:6px;
+}
+.carousel-card h3 {
+  font-family:var(--fd); font-size:1.3rem; font-weight:400;
+  color:var(--iv); margin-bottom:.4rem;
+}
+.carousel-card p {
+  font-size:.82rem; font-weight:300; color:var(--pw);
+  letter-spacing:.05em;
+}
+.carousel-nav {
+  display:flex; justify-content:center; align-items:center;
+  gap:1.5rem; margin-top:1.5rem;
+}
+.carousel-btn {
+  width:44px; height:44px; border-radius:50%;
+  border:1px solid var(--gr); background:transparent;
+  color:var(--st); font-size:1.1rem; cursor:pointer;
+  transition:all .3s; display:flex; align-items:center; justify-content:center;
+}
+.carousel-btn:hover { background:var(--iv); color:var(--bk); border-color:var(--iv); }
+.carousel-dots { display:flex; gap:.5rem; }
+.carousel-dot {
+  width:6px; height:6px; border-radius:50%; background:var(--gr);
+  border:none; cursor:pointer; transition:all .3s; padding:0;
+}
+.carousel-dot.active { background:var(--rg); width:20px; border-radius:3px; }
+
+/* ===== LITTLE B.E. SECTION ===== */
+.little-be {
+  position: relative;
+  overflow: hidden;
+  background: var(--ch);
+  margin: 0;
+  padding: 0;
+}
+.little-be-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 85vh;
+  max-width: 100%;
+}
+/* Left: copy side */
+.little-be-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6rem 5rem 6rem 6rem;
+  position: relative;
+  z-index: 2;
+}
+.lbe-tag {
+  font-size: .6rem;
+  font-weight: 500;
+  letter-spacing: .4em;
+  text-transform: uppercase;
+  color: var(--rg);
+  margin-bottom: 1.5rem;
+}
+.lbe-title {
+  font-family: var(--fd);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(2.8rem, 5vw, 4.2rem);
+  color: var(--rgb);
+  line-height: 1.05;
+  margin-bottom: 0.15em;
+}
+.lbe-title strong {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--iv);
+  letter-spacing: 0.04em;
+}
+.lbe-headline {
+  font-family: var(--fb);
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-weight: 300;
+  color: var(--pw);
+  line-height: 1.35;
+  margin-top: 2rem;
+  margin-bottom: 0.4em;
+}
+.lbe-headline-accent {
+  font-family: var(--fb);
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-weight: 300;
+  color: var(--st);
+  line-height: 1.35;
+}
+.lbe-philosophy {
+  font-family: var(--fd);
+  font-size: clamp(1.1rem, 1.8vw, 1.35rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--rg);
+  margin-top: 2rem;
+  line-height: 1.5;
+}
+.lbe-divider {
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(to right, var(--rg), transparent);
+  margin: 2rem 0;
+}
+.lbe-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--fb);
+  font-size: .8rem;
+  font-weight: 400;
+  letter-spacing: .15em;
+  color: var(--iv);
+  text-decoration: none;
+  padding: 1rem 2.25rem;
+  background: rgba(245,240,235,0.7);
+  border: 1px solid rgba(160,132,110,0.15);
+  border-radius: 2px;
+  transition: all 0.35s ease;
+  margin-top: 0.5rem;
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+.lbe-cta:hover {
+  background: var(--iv);
+  color: var(--bk);
+  border-color: var(--iv);
+}
+.lbe-cta svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  transition: transform 0.3s ease;
+}
+.lbe-cta:hover svg {
+  transform: translateX(4px);
+}
+
+/* Right: image side */
+.little-be-visual {
+  position: relative;
+  overflow: hidden;
+  min-height: 600px;
+}
+.lbe-img-main {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+/* Woven label overlay - bottom right */
+.lbe-label {
+  position: absolute;
+  bottom: 2.5rem;
+  right: 2.5rem;
+  background: rgba(237,230,222,0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(160,132,110,0.12);
+  padding: 1.25rem 1.75rem;
+  border-radius: 4px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  z-index: 3;
+}
+.lbe-label-name {
+  font-family: var(--fd);
+  font-size: 1.1rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--rgb);
+  margin-bottom: 0.25rem;
+}
+.lbe-label-name strong {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--iv);
+}
+.lbe-label-msg {
+  font-family: var(--fb);
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--pw);
+}
+
+/* Soft gradient overlay on image left edge for text bleed */
+.little-be-visual::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 80px;
+  height: 100%;
+  background: linear-gradient(to right, var(--ch), transparent);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Little B.E. product highlights strip */
+.lbe-products {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  background: var(--bk);
+}
+.lbe-product-card {
+  text-align: center;
+  padding: 3rem 2rem 2.5rem;
+  border-right: 1px solid rgba(160,132,110,0.08);
+  transition: background 0.3s ease;
+  cursor: pointer;
+}
+.lbe-product-card:last-child { border-right: none; }
+.lbe-product-card:hover { background: var(--ch); }
+.lbe-product-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--ch);
+  border: 1px solid rgba(160,132,110,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  transition: all 0.3s ease;
+}
+.lbe-product-card:hover .lbe-product-icon {
+  background: var(--iv);
+}
+.lbe-product-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--rg);
+  fill: none;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.3s ease;
+}
+.lbe-product-card:hover .lbe-product-icon svg {
+  stroke: var(--cm);
+}
+.lbe-product-name {
+  font-family: var(--fd);
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--iv);
+  margin-bottom: 0.35rem;
+}
+.lbe-product-desc {
+  font-size: 0.7rem;
+  font-weight: 300;
+  color: var(--pw);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+.lbe-product-tag {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.55rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rg);
+  padding: 4px 12px;
+  border: 1px solid rgba(160,132,110,0.15);
+  border-radius: 2px;
+}
+
+/* ===== END LITTLE B.E. ===== */
+
+/* COMMUNITY */
+.co { padding:6rem 3rem; text-align:center; }
+.sf { display:flex; max-width:480px; margin:2rem auto; gap:1rem; }
+.sf input { flex:1; padding:1rem; border:1px solid var(--gr); border-radius:0; font-family:var(--fb); }
+.sf button { padding:1rem 2rem; background:var(--iv); color:var(--bk); border:none; cursor:pointer; }
+
+/* ECOSYSTEM & FOOTER */
+.eco { text-align:center; padding:3rem; font-size:.9rem; color:var(--st); }
+.eco-b a { color:var(--rg); text-decoration:none; margin:0 .8rem; }
+.ft { background:var(--iv); color:#fff; padding:6rem 3rem 3rem; }
+.ft-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:3rem; max-width:1200px; margin:0 auto; }
+.ft-bn { font-family:var(--fd); font-size:1.8rem; margin-bottom:.5rem; }
+.ft-m { font-style:italic; opacity:.8; margin-top:1.5rem; }
+.ft-col h5 { font-size:.9rem; letter-spacing:.15em; text-transform:uppercase; margin-bottom:1.2rem; }
+.ft-col ul { list-style:none; }
+.ft-col a { color:#ddd; text-decoration:none; line-height:2; }
+.ft-bot { text-align:center; margin-top:5rem; font-size:.85rem; opacity:.7; }
+.ft-soc a { color:#fff; margin:0 1rem; }
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .section { padding:5rem 1.5rem; }
+  .mf { grid-template-columns:1fr; }
+  .mf-v { min-height:500px; background-size:contain !important; background-position:center top !important; }
+  .mf-c { padding:4rem 2rem; }
+  img, .mf-v, section[style*="background-image"] {
+    object-fit:contain !important; background-size:contain !important;
+  }
+  .carousel-card { flex:0 0 280px; padding:1.5rem 1rem 2rem; }
+  .carousel-card img { height:320px; }
+
+  /* Little B.E. mobile */
+  .little-be-inner {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .little-be-copy {
+    padding: 4rem 2rem 3rem;
+    order: 2;
+  }
+  .little-be-visual {
+    min-height: 420px;
+    order: 1;
+  }
+  .little-be-visual::before { display: none; }
+  .lbe-label {
+    bottom: 1.25rem;
+    right: 1.25rem;
+    padding: 1rem 1.25rem;
+  }
+  .lbe-products {
+    grid-template-columns: 1fr 1fr;
+  }
+  .lbe-product-card {
+    padding: 2rem 1.25rem;
+    border-bottom: 1px solid rgba(160,132,110,0.08);
+  }
+  .lbe-product-card:nth-child(odd) { border-right: 1px solid rgba(160,132,110,0.08); }
+  .lbe-product-card:nth-child(even) { border-right: none; }
+}
+
+@media (max-width: 480px) {
+  .little-be-visual { min-height: 340px; }
+  .lbe-title { font-size: 2.4rem; }
+  .lbe-headline, .lbe-headline-accent { font-size: 1.2rem; }
+  .lbe-products { grid-template-columns: 1fr; }
+  .lbe-product-card { border-right: none !important; }
+}
+
+/* QR DIGITAL EXPERIENCE */
+.qr-experience { padding:5rem 3rem; background:var(--iv); color:var(--bk); position:relative; overflow:hidden; }
+.qr-experience::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--mg),transparent); }
+.qr-inner { max-width:1100px; margin:0 auto; }
+.qr-header { text-align:center; margin-bottom:3.5rem; }
+.qr-header .sl { color:var(--mg); }
+.qr-header .sh { color:var(--bk); }
+.qr-header .st { color:var(--gr); max-width:600px; margin:0 auto; }
+.qr-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:2rem; }
+.qr-card { padding:2rem; border:1px solid rgba(184,175,165,.12); border-radius:8px; background:rgba(245,240,235,.04); transition:all .35s; position:relative; }
+.qr-card:hover { background:rgba(245,240,235,.08); border-color:rgba(196,162,101,.25); transform:translateY(-3px); }
+.qr-card-icon { width:44px; height:44px; border:1px solid var(--mg); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:1.25rem; }
+.qr-card-icon svg { width:20px; height:20px; stroke:var(--mg); fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+.qr-card h3 { font-family:var(--fd); font-size:1.15rem; font-weight:500; color:var(--bk); margin-bottom:.5rem; }
+.qr-card p { font-size:.78rem; font-weight:300; color:var(--gr); line-height:1.7; }
+.qr-card .qr-tag { display:inline-block; font-size:.55rem; font-weight:500; letter-spacing:.15em; text-transform:uppercase; color:var(--mg); margin-top:.75rem; padding:4px 10px; border:1px solid rgba(196,162,101,.25); border-radius:2px; }
+.qr-demo { text-align:center; margin-top:3rem; }
+.qr-demo-btn { display:inline-flex; align-items:center; gap:10px; padding:14px 32px; border:1px solid var(--mg); border-radius:4px; color:var(--mg); font-family:var(--fb); font-size:.7rem; font-weight:500; letter-spacing:.15em; text-transform:uppercase; text-decoration:none; transition:all .3s; }
+.qr-demo-btn:hover { background:var(--mg); color:var(--iv); }
+.qr-demo-btn svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.5; }
+.qr-demo-note { font-size:.65rem; font-weight:300; color:var(--pw); margin-top:.75rem; }
+@media (max-width:768px) {
+  .qr-experience { padding:4rem 1.5rem; }
+  .qr-grid { grid-template-columns:1fr; gap:1.25rem; }
+  .qr-card { padding:1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav class="nav" id="nav">
+  <a href="#" class="nav-logo">Bi<span>Ja</span>Di</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#manifesto">STORY</a></li>
+    <li><a href="#capsule">B.E.</a></li>
+    <li><a href="#little">LITTLE B.E.</a></li>
+    <li><a href="#experience">EXPERIENCE</a></li>
+    <li><a href="#community">COMMUNITY</a></li>
+    <li><a href="/shop.html">SHOP</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO / MAIN COLLAGE -->
+<section class="section hero-bg" id="hero" style="min-height:90vh; background:linear-gradient(180deg, var(--ch) 0%, var(--bk) 100%); position:relative; display:flex; align-items:center; overflow:hidden;">
+  <div style="position:absolute; right:-5%; top:50%; transform:translateY(-50%); width:55%; max-width:700px; opacity:.18;">
+    <img src="Hoodie-1.png" alt="" style="width:100%; height:auto; filter:grayscale(30%) contrast(.9);">
+  </div>
+  <div class="inner rv" style="position:relative; z-index:2;">
+    <p class="sl">FIRST DROP COLLECTION</p>
+    <h2 class="sh">B.E.<br>Beyond Enough</h2>
+    <p class="st">Elevated · Timeless · Empowering</p>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section class="mf" id="manifesto">
+  <div class="mf-c rv">
+    <p class="sl">OUR STORY</p>
+    <h2 class="sh">Quiet Power</h2>
+    <p class="st">A family-focused luxury lifestyle brand rooted in grace, strength, and unapologetic elegance. We don't follow trends — we reset them.</p>
+    <div class="divider"></div>
+  </div>
+  <div class="mf-v rv" style="display:flex; align-items:center; justify-content:center; position:relative;">
+    <img src="hoodie-2.png" alt="B.E. Hoodie detail" style="position:absolute; width:65%; max-width:400px; top:50%; left:50%; transform:translate(-50%,-50%); opacity:.85; filter:drop-shadow(0 20px 40px rgba(0,0,0,.08));">
+    <div style="position:absolute; bottom:3rem; right:3.5rem; font-family:var(--fd); font-size:5rem; font-weight:300; font-style:italic; color:rgba(160,132,110,.1); line-height:.9; text-align:right;">B.E.</div>
+  </div>
+</section>
+
+<!-- CAPSULE / B.E. SECTION – Carousel -->
+<section class="section ci" id="capsule">
+  <div class="inner rv">
+    <p class="sl">B.E. COLLECTION</p>
+    <h2 class="sh">Everyday Elevated</h2>
+    
+    <div class="carousel-wrap">
+      <div class="carousel" id="productCarousel">
+        <div class="carousel-card">
+          <img src="Hoodie-1.png" alt="B.E. Hoodie — Front">
+          <h3>Hoodie</h3>
+          <p>Oversized fit · Tone-on-tone B.E. embroidery</p>
+        </div>
+        <div class="carousel-card">
+          <img src="hoodie-2.png" alt="B.E. Hoodie — Detail">
+          <h3>Hoodie</h3>
+          <p>Gold-tip drawcord · Woven hem label</p>
+        </div>
+        <div class="carousel-card">
+          <img src="Jogger-1.png" alt="B.E. Jogger — Folded">
+          <h3>Jogger</h3>
+          <p>Relaxed fit · Hidden message tag</p>
+        </div>
+        <div class="carousel-card">
+          <img src="Jogger-2.png" alt="B.E. Jogger — Full">
+          <h3>Jogger</h3>
+          <p>Tapered leg · Gold hardware accents</p>
+        </div>
+        <div class="carousel-card">
+          <img src="Tee-1.png" alt="B.E. Tee — Front">
+          <h3>Tee</h3>
+          <p>Breathable cotton · Subtle B.E. detail</p>
+        </div>
+        <div class="carousel-card">
+          <img src="Tee-2.png" alt="B.E. Tee — Angle">
+          <h3>Tee</h3>
+          <p>Ribbed crew neck · Woven hem label</p>
+        </div>
+      </div>
+      <div class="carousel-nav">
+        <button class="carousel-btn" id="carouselPrev" aria-label="Previous">&#8592;</button>
+        <div class="carousel-dots" id="carouselDots"></div>
+        <button class="carousel-btn" id="carouselNext" aria-label="Next">&#8594;</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- LITTLE B.E. SECTION                                           -->
+<!-- ============================================================ -->
+<section class="little-be" id="little">
+
+  <!-- Hero split: copy + image -->
+  <div class="little-be-inner rv">
+    <div class="little-be-copy">
+      <div class="lbe-tag">For Little Souls</div>
+      <h2 class="lbe-title"><em>Little</em> <strong>B.E.</strong></h2>
+      <div class="lbe-headline">Softly Subtle.</div>
+      <div class="lbe-headline-accent">Quietly Empowering.</div>
+      <p class="lbe-philosophy">Little souls, already enough.</p>
+      <div class="lbe-divider"></div>
+      <a href="/shop.html" class="lbe-cta">
+        Shop Little B.E.
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+    <div class="little-be-visual">
+      <!-- Replace src with your actual Little B.E. campaign image -->
+      <img class="lbe-img-main" src="Little_B.E.png" alt="Two children in Little B.E. hoodies — cream and taupe — sitting together" style="width:100%;height:100%;object-fit:cover;object-position:center top;">
+      <!-- Woven label detail overlay -->
+      <div class="lbe-label">
+        <div class="lbe-label-name"><em>Little</em> <strong>B.E.</strong></div>
+        <div class="lbe-label-msg">You are already enough.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product highlights strip -->
+  <div class="lbe-products rv">
+    <div class="lbe-product-card">
+      <div class="lbe-product-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="lbe-product-name">Mini Hoodie</div>
+      <div class="lbe-product-desc">Oversized cozy fit with tone-on-tone B.E. embroidery</div>
+      <div class="lbe-product-tag">Sizes 2T – 8</div>
+    </div>
+    <div class="lbe-product-card">
+      <div class="lbe-product-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+      </div>
+      <div class="lbe-product-name">Little Jogger</div>
+      <div class="lbe-product-desc">Soft tapered leg with hidden "You are enough" message tag</div>
+      <div class="lbe-product-tag">Sizes 2T – 8</div>
+    </div>
+    <div class="lbe-product-card">
+      <div class="lbe-product-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="lbe-product-name">B.E. Tee</div>
+      <div class="lbe-product-desc">Breathable cotton with subtle woven hem label</div>
+      <div class="lbe-product-tag">Sizes 2T – 8</div>
+    </div>
+    <div class="lbe-product-card">
+      <div class="lbe-product-icon">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+      </div>
+      <div class="lbe-product-name">Bond Blanket</div>
+      <div class="lbe-product-desc">Luxe knit with gold "Family First" embroidered edge</div>
+      <div class="lbe-product-tag">Coming Soon</div>
+    </div>
+  </div>
+
+</section>
+<!-- ============================================================ -->
+<!-- END LITTLE B.E.                                               -->
+<!-- ============================================================ -->
+
+
+<!-- ============================================================ -->
+<!-- QR DIGITAL EXPERIENCE                                         -->
+<!-- ============================================================ -->
+<section class="qr-experience" id="experience">
+  <div class="qr-inner">
+
+    <div class="qr-header rv">
+      <p class="sl">Inside Every Garment</p>
+      <h2 class="sh">More Than a Tag.</h2>
+      <p class="st">Every Little B.E. piece carries a unique QR code that unlocks a private digital experience for your family — memories, milestones, and messages that live inside the clothes your child grows up in.</p>
+    </div>
+
+    <div class="qr-grid">
+      <div class="qr-card rv">
+        <div class="qr-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <h3>Our Little B.E. Moment</h3>
+        <p>Upload a photo of your child wearing the piece, add a date and a caption. Over time it builds a visual timeline — your child growing up in Little B.E. A luxury digital memory book tied to the clothes themselves.</p>
+        <span class="qr-tag">Digital Memory Journal</span>
+      </div>
+
+      <div class="qr-card rv">
+        <div class="qr-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <h3>Beyond Enough Promise</h3>
+        <p>Write a letter or affirmation to your child. It gets sealed with a digital gold wax stamp and locked until a future date — a birthday, graduation, or when they turn 18. Sealed with love, opened when ready.</p>
+        <span class="qr-tag">Parent-to-Child Letter Vault</span>
+      </div>
+
+      <div class="qr-card rv">
+        <div class="qr-card-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8l-4 4-4-4"/><path d="M12 12v6"/></svg>
+        </div>
+        <h3>Spin to Win</h3>
+        <p>Every garment gets one spin on the B.E. Prize Wheel. Win discounts, free shipping, exclusive drops, or limited-edition accessories. It's a one-time surprise that makes unboxing unforgettable.</p>
+        <span class="qr-tag">Prize Wheel — One Spin Per Garment</span>
+      </div>
+
+      <div class="qr-card rv">
+        <div class="qr-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <h3>Share &amp; Refer</h3>
+        <p>Share the Little B.E. experience with other families. Every referral builds your B.E. family circle and unlocks rewards — because the best things in life are passed from one family to another.</p>
+        <span class="qr-tag">Family Referral Network</span>
+      </div>
+    </div>
+
+    <div class="qr-demo rv">
+      <a href="https://www.bijadi.net/little-be-qr-live.html?code=LBE-047" target="_blank" class="qr-demo-btn">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3z"/><path d="M20 14v3h-3"/><path d="M14 20h3"/><path d="M20 20h0"/></svg>
+        Try the Demo Experience
+      </a>
+      <p class="qr-demo-note">Opens a live demo with garment code LBE-047</p>
+    </div>
+
+  </div>
+</section>
+<!-- ============================================================ -->
+<!-- END QR EXPERIENCE                                             -->
+<!-- ============================================================ -->
+
+
+<!-- COMMUNITY / SUBSCRIBE -->
+<section class="co" id="community">
+  <div class="inner rv">
+    <p class="sl">JOIN THE MOVEMENT</p>
+    <h2 class="sh">You Already Know.<br>Now Be the First.</h2>
+    <p class="st">Subscribe for exclusive early access to drops, stories, and the BiJaDi Manifesto.</p>
+    <form class="sf" onsubmit="event.preventDefault();this.querySelector('button').textContent='Welcome ✓';this.querySelector('input').value='';">
+      <input type="email" placeholder="Your email address" required>
+      <button type="submit">Subscribe</button>
+    </form>
+  </div>
+</section>
+
+<!-- ECOSYSTEM -->
+<div class="eco">
+  <p class="eco-l">A Tru Skool® Entertainment International Corp. Brand</p>
+  <div class="eco-b">
+    <a href="https://truskool.net" target="_blank">Tru Skool®</a> • 
+    <a href="#">Concrete Rose™</a> • 
+    <a href="#">Faithfully Faded</a> • 
+    <a href="https://dallasiteontour.org" target="_blank">Dallasite on Tour™</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="ft">
+  <div class="ft-grid">
+    <div>
+      <p class="ft-bn">BiJaDi</p>
+      <p class="ft-bd">Family-focused luxury lifestyle brand rooted in grace, strength, and unapologetic elegance. Europe / Dallas, TX.</p>
+      <p class="ft-m">BiJaDi doesn't follow trends.<br>She is the reason trends reset.</p>
+    </div>
+  </div>
+  <div class="ft-bot">
+    <p>© 2026 BiJaDi LLC. All rights reserved. A Tru Skool® Entertainment brand.</p>
+  </div>
+</footer>
+
+<script>
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+});
+const nt = document.getElementById('navToggle'), nl = document.getElementById('navLinks');
+nt.addEventListener('click', () => nl.classList.toggle('active'));
+nl.querySelectorAll('a').forEach(l => l.addEventListener('click', () => nl.classList.remove('active')));
+const rvs = document.querySelectorAll('.rv');
+const obs = new IntersectionObserver(e => {
+  e.forEach(el => { if (el.isIntersecting) el.target.classList.add('v'); });
+}, { threshold: .12 });
+rvs.forEach(el => obs.observe(el));
+
+/* CAROUSEL */
+const carousel = document.getElementById('productCarousel');
+const prevBtn = document.getElementById('carouselPrev');
+const nextBtn = document.getElementById('carouselNext');
+const dotsWrap = document.getElementById('carouselDots');
+const cards = carousel.querySelectorAll('.carousel-card');
+const cardWidth = 340;
+
+cards.forEach((_, i) => {
+  const dot = document.createElement('button');
+  dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+  dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+  dot.addEventListener('click', () => scrollToCard(i));
+  dotsWrap.appendChild(dot);
+});
+
+function scrollToCard(idx) {
+  carousel.scrollTo({ left: idx * cardWidth, behavior: 'smooth' });
+}
+
+prevBtn.addEventListener('click', () => {
+  carousel.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+});
+nextBtn.addEventListener('click', () => {
+  carousel.scrollBy({ left: cardWidth, behavior: 'smooth' });
+});
+
+carousel.addEventListener('scroll', () => {
+  const idx = Math.round(carousel.scrollLeft / cardWidth);
+  dotsWrap.querySelectorAll('.carousel-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+});
+</script>
+</body>
+</html>
