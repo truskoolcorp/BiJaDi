@@ -150,7 +150,7 @@ body{font-family:var(--fb);background:var(--bk);color:var(--iv);-webkit-font-smo
 <body>
 
 <nav class="shop-nav">
-  <a href="#" class="shop-logo">Bi<span>Ja</span>Di</a>
+  <a href="/" class="shop-logo">Bi<span>Ja</span>Di</a>
   <button class="cart-btn" onclick="toggleCart()">
     Cart <span class="cart-count" id="cartCount">0</span>
   </button>
@@ -262,7 +262,7 @@ body{font-family:var(--fb);background:var(--bk);color:var(--iv);-webkit-font-smo
     </div>
 
     <div class="crypto-note">
-      After sending, email <strong>orders@bijadi.com</strong> with your order number and transaction hash/ID. We'll confirm your order within 24 hours once payment is verified on-chain. Free shipping on all pre-orders.
+      After sending, email <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8ee1fceaebfcfdceece7e4efeae7a0ede1e3">[email&#160;protected]</a></strong> with your order number and transaction hash/ID. We'll confirm your order within 24 hours once payment is verified on-chain. Free shipping on all pre-orders.
     </div>
     <button class="crypto-close" onclick="closeCrypto()">Done</button>
   </div>
@@ -275,7 +275,7 @@ body{font-family:var(--fb);background:var(--bk);color:var(--iv);-webkit-font-smo
   <div class="bf-sub">Family First — Beyond Enough</div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const API = 'https://hvdxrbomlvcxdpehaqri.supabase.co/functions/v1';
 let allProducts = [];
 let cart = [];
@@ -510,15 +510,4 @@ function closeCrypto() {
 }
 
 // ===== TOAST =====
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// ===== INIT =====
-loadProducts();
-</script>
-</body>
-</html>
+function show
