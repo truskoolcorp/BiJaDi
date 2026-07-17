@@ -201,9 +201,9 @@ body{font-family:var(--fb);background:var(--bk);color:var(--iv);-webkit-font-smo
         <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         Card
       </button>
-      <button class="pay-method" onclick="selectPayMethod('coinbase',this)">
+      <button class="pay-method" type="button" disabled title="Crypto checkout is temporarily unavailable while the dedicated order flow is being verified">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M6 12h12"/></svg>
-        Crypto
+        Crypto · Setup
       </button>
     </div>
     <button class="checkout-btn" id="checkoutBtn" onclick="checkout()">Pre-Order Now</button>
@@ -282,6 +282,12 @@ let cart = [];
 let selectedPayMethod = 'stripe';
 let discountCode = '';
 
+function trackCommerce(eventName, detail = {}) {
+  const payload = { currency: 'USD', ...detail };
+  window.dispatchEvent(new CustomEvent(`bijadi:${eventName}`, { detail: payload }));
+  if (typeof window.gtag === 'function') window.gtag('event', eventName, payload);
+}
+
 // ===== LOAD PRODUCTS =====
 async function loadProducts() {
   try {
@@ -357,6 +363,8 @@ function addToCart(slug, btn) {
   if (existing) { existing.quantity = Math.min(existing.quantity + 1, 10); }
   else { cart.push({ slug, name: product.name, size, color, quantity: 1, price_cents: product.price_cents }); }
 
+  trackCommerce('add_to_cart', { value: product.price_cents / 100, items: [{ item_id: slug, item_name: product.name, quantity: 1, price: product.price_cents / 100 }] });
+
   btn.textContent = 'Added!';
   btn.classList.add('added');
   setTimeout(() => { btn.textContent = 'Add to Bag'; btn.classList.remove('added'); }, 1500);
@@ -430,34 +438,13 @@ async function checkout() {
   btn.disabled = true;
   btn.textContent = 'Processing...';
 
-  // For crypto manual payment, show the wallet modal directly
+  // Never create a Stripe session for the crypto UI. A dedicated crypto order
+  // endpoint must be verified before this path can accept customer orders.
   if (selectedPayMethod === 'coinbase') {
-    // Create a manual order
-    try {
-      const res = await fetch(`${API}/checkout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: cart.map(i => ({ slug: i.slug, size: i.size, color: i.color, quantity: i.quantity })),
-          customer: { email: 'crypto-pending@bijadi.com', name: 'Crypto Customer' },
-          payment_method: 'stripe', // Create order via stripe path but we'll show crypto modal
-          discount_code: discountCode || undefined,
-        }),
-      });
-      const data = await res.json();
-      // Show crypto modal with order info
-      const subtotal = cart.reduce((s, i) => s + i.price_cents * i.quantity, 0);
-      document.getElementById('cryptoOrderRef').textContent = data.order_number || 'BIJADI-CRYPTO';
-      document.getElementById('cryptoAmount').textContent = `$${(subtotal / 100).toFixed(2)} USD equivalent`;
-      document.getElementById('cryptoModal').classList.add('show');
-    } catch (e) {
-      const subtotal = cart.reduce((s, i) => s + i.price_cents * i.quantity, 0);
-      document.getElementById('cryptoOrderRef').textContent = 'Pending';
-      document.getElementById('cryptoAmount').textContent = `$${(subtotal / 100).toFixed(2)} USD equivalent`;
-      document.getElementById('cryptoModal').classList.add('show');
-    }
+    trackCommerce('checkout_unavailable', { payment_method: 'crypto' });
+    showToast('Crypto checkout is temporarily unavailable. Please use Card.');
     btn.disabled = false;
-    btn.textContent = 'Pay with Crypto';
+    btn.textContent = 'Pre-Order Now';
     return;
   }
 
@@ -466,6 +453,9 @@ async function checkout() {
   if (!email) { btn.disabled = false; btn.textContent = 'Pre-Order Now'; return; }
   const name = prompt('Your full name:');
   if (!name) { btn.disabled = false; btn.textContent = 'Pre-Order Now'; return; }
+
+  const checkoutValue = cart.reduce((sum, item) => sum + item.price_cents * item.quantity, 0) / 100;
+  trackCommerce('begin_checkout', { value: checkoutValue, payment_method: 'card', items: cart.map(item => ({ item_id: item.slug, item_name: item.name, quantity: item.quantity, price: item.price_cents / 100 })) });
 
   try {
     const res = await fetch(`${API}/checkout`, {
@@ -480,13 +470,16 @@ async function checkout() {
     });
     const data = await res.json();
     if (data.success && data.checkout_url) {
+      trackCommerce('checkout_redirect', { value: checkoutValue, payment_method: 'card' });
       window.location.href = data.checkout_url;
     } else {
+      trackCommerce('checkout_error', { payment_method: 'card', error_type: 'provider_response' });
       showToast(data.error || 'Checkout failed. Please try again.');
       btn.disabled = false;
       btn.textContent = 'Pre-Order Now';
     }
   } catch (e) {
+    trackCommerce('checkout_error', { payment_method: 'card', error_type: 'network' });
     showToast('Connection error. Please try again.');
     btn.disabled = false;
     btn.textContent = 'Pre-Order Now';
