@@ -11,7 +11,7 @@ const corsHeaders = {
 function isAuthorized(req: Request): boolean {
   const key = req.headers.get("x-admin-key");
   const expected = Deno.env.get("ADMIN_KEY");
-  return key === expected;
+  return typeof expected === "string" && expected.length >= 32 && typeof key === "string" && key.length > 0 && key === expected;
 }
 
 Deno.serve(async (req: Request) => {
