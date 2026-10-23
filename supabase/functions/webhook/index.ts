@@ -84,67 +84,9 @@ Deno.serve(async (req: Request) => {
     // Handles both legacy Commerce and new Business event formats
     // ============================================================
     if (provider === 'coinbase') {
-      // Coinbase webhook signing scheme and associated secret must be verified against the configured product before re-enabling writes.
-      // Fail closed; return a retryable status instead of trusting arbitrary payloads.
+      // No provider-specific signature verification has yet been validated.
+      // Keep order updates disabled; 503 allows a configured provider to retry.
       return new Response('Coinbase webhook verification not configured', { status: 503 });
-      const body = await req.text();
-      const payload = JSON.parse(body);
-
-      // New Coinbase Business format uses payload.event or payload directly
-      const event = payload.event || payload;
-      const eventType = event?.type || event?.event?.type;
-      const eventData = event?.data || event?.event?.data || event;
-
-      // Try to extract order_id from metadata
-      const orderId = eventData?.metadata?.order_id
-        || eventData?.metadata?.orderId
-        || null;
-
-      if (!orderId) {
-        console.log('Webhook received but no order_id in metadata:', JSON.stringify(payload).substring(0, 500));
-        return new Response(JSON.stringify({ received: true, note: 'no order_id found' }), {
-          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Map both old Commerce and new Business status events
-      const paidStatuses = [
-        'charge:confirmed', 'charge:resolved',  // old Commerce
-        'payment_link:completed', 'COMPLETED',    // new Business
-      ];
-      const failedStatuses = [
-        'charge:failed', 'charge:expired',        // old Commerce
-        'payment_link:failed', 'payment_link:expired', 'FAILED', 'EXPIRED',  // new Business
-      ];
-      const pendingStatuses = [
-        'charge:pending',                         // old Commerce
-        'payment_link:pending', 'ACTIVE',         // new Business
-      ];
-
-      if (paidStatuses.includes(eventType)) {
-        await supabase.from("orders").update({
-          payment_status: 'paid',
-          order_status: 'confirmed',
-          updated_at: new Date().toISOString(),
-        }).eq("id", orderId);
-        console.log(`Order ${orderId} confirmed via Coinbase (${eventType})`);
-
-      } else if (failedStatuses.includes(eventType)) {
-        await supabase.from("orders").update({
-          payment_status: 'failed',
-          updated_at: new Date().toISOString(),
-        }).eq("id", orderId);
-        console.log(`Order ${orderId} failed via Coinbase (${eventType})`);
-
-      } else if (pendingStatuses.includes(eventType)) {
-        console.log(`Order ${orderId} pending via Coinbase (${eventType})`);
-      } else {
-        console.log(`Unknown Coinbase event type: ${eventType}`);
-      }
-
-      return new Response(JSON.stringify({ received: true }), {
-        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
     }
 
     return new Response(JSON.stringify({ error: "Specify ?provider=stripe or ?provider=coinbase" }), {
