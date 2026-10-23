@@ -50,6 +50,16 @@ Deno.serve(async (req: Request) => {
       if (!secret) return new Response('Webhook unavailable', { status: 503 });
       if (!await verifyStripeSignature(body, req.headers.get('stripe-signature'), secret)) return new Response('Invalid webhook signature', { status: 400 });
       const event = JSON.parse(body);
+      if (!event || typeof event.id !== "string" || !event.id.startsWith("evt_")) {
+        return new Response("Malformed Stripe event", { status: 400 });
+      }
+      if (event.type === "checkout.session.completed" || event.type === "checkout.session.expired") {
+        const session = event.data?.object;
+        if (typeof session?.id !== "string" || !session.id.startsWith("cs_") || typeof session.metadata?.order_id !== "string" || !session.metadata.order_id) {
+          // Authenticated event but no safely identifiable order: retry for investigation.
+          return new Response("Checkout event missing required identifiers", { status: 500 });
+        }
+      }
 
       if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
@@ -62,8 +72,14 @@ Deno.serve(async (req: Request) => {
             updated_at: new Date().toISOString(),
           }).eq("id", orderId).eq("stripe_session_id", session.id).eq("payment_status", "pending").select("id");
           if (error) throw error;
-          if (!updated?.length) console.log("No pending order matched completed checkout");
-          console.log(`Order ${orderId} confirmed via Stripe`);
+          if (!updated?.length) {
+            // Do not acknowledge an unknown/mismatched order until reconciliation.
+            const { data: existing, error: lookupError } = await supabase.from("orders").select("id,payment_status,stripe_session_id").eq("id", orderId).maybeSingle();
+            if (lookupError) throw lookupError;
+            if (!existing || existing.stripe_session_id !== session.id || existing.payment_status !== "paid") {
+              return new Response("Checkout order not reconciled", { status: 500 });
+            }
+          }
         }
       } else if (event.type === 'checkout.session.expired') {
         const session = event.data.object;
