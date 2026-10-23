@@ -61,36 +61,17 @@ Deno.serve(async (req: Request) => {
         }
       }
 
-      if (event.type === 'checkout.session.completed') {
+      if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.expired') {
         const session = event.data.object;
-        const orderId = session.metadata?.order_id;
-        if (orderId) {
-          const { data: updated, error } = await supabase.from("orders").update({
-            payment_status: 'paid',
-            stripe_payment_intent: session.payment_intent,
-            order_status: 'confirmed',
-            updated_at: new Date().toISOString(),
-          }).eq("id", orderId).eq("stripe_session_id", session.id).eq("payment_status", "pending").select("id");
-          if (error) throw error;
-          if (!updated?.length) {
-            // Do not acknowledge an unknown/mismatched order until reconciliation.
-            const { data: existing, error: lookupError } = await supabase.from("orders").select("id,payment_status,stripe_session_id").eq("id", orderId).maybeSingle();
-            if (lookupError) throw lookupError;
-            if (!existing || existing.stripe_session_id !== session.id || existing.payment_status !== "paid") {
-              return new Response("Checkout order not reconciled", { status: 500 });
-            }
-          }
-        }
-      } else if (event.type === 'checkout.session.expired') {
-        const session = event.data.object;
-        const orderId = session.metadata?.order_id;
-        if (orderId) {
-          const { error } = await supabase.from("orders").update({
-            payment_status: 'failed',
-            updated_at: new Date().toISOString(),
-          }).eq("id", orderId).eq("stripe_session_id", session.id).eq("payment_status", "pending");
-          if (error) throw error;
-        }
+        const { data: outcome, error } = await supabase.rpc('process_verified_stripe_checkout_event', {
+          p_event_id: event.id,
+          p_event_type: event.type,
+          p_order_id: session.metadata.order_id,
+          p_session_id: session.id,
+          p_payment_intent: typeof session.payment_intent === 'string' ? session.payment_intent : null,
+        });
+        if (error) throw error;
+        console.log('Verified Stripe event processed:', event.id, outcome);
       }
 
       return new Response(JSON.stringify({ received: true }), {
