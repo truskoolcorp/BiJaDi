@@ -55,22 +55,25 @@ Deno.serve(async (req: Request) => {
         const session = event.data.object;
         const orderId = session.metadata?.order_id;
         if (orderId) {
-          await supabase.from("orders").update({
+          const { data: updated, error } = await supabase.from("orders").update({
             payment_status: 'paid',
             stripe_payment_intent: session.payment_intent,
             order_status: 'confirmed',
             updated_at: new Date().toISOString(),
-          }).eq("id", orderId);
+          }).eq("id", orderId).eq("payment_status", "pending").select("id");
+          if (error) throw error;
+          if (!updated?.length) console.log("No pending order matched completed checkout");
           console.log(`Order ${orderId} confirmed via Stripe`);
         }
       } else if (event.type === 'checkout.session.expired') {
         const session = event.data.object;
         const orderId = session.metadata?.order_id;
         if (orderId) {
-          await supabase.from("orders").update({
+          const { error } = await supabase.from("orders").update({
             payment_status: 'failed',
             updated_at: new Date().toISOString(),
-          }).eq("id", orderId);
+          }).eq("id", orderId).eq("payment_status", "pending");
+          if (error) throw error;
         }
       }
 
