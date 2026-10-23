@@ -60,7 +60,7 @@ Deno.serve(async (req: Request) => {
             stripe_payment_intent: session.payment_intent,
             order_status: 'confirmed',
             updated_at: new Date().toISOString(),
-          }).eq("id", orderId).eq("payment_status", "pending").select("id");
+          }).eq("id", orderId).eq("stripe_session_id", session.id).eq("payment_status", "pending").select("id");
           if (error) throw error;
           if (!updated?.length) console.log("No pending order matched completed checkout");
           console.log(`Order ${orderId} confirmed via Stripe`);
@@ -72,7 +72,7 @@ Deno.serve(async (req: Request) => {
           const { error } = await supabase.from("orders").update({
             payment_status: 'failed',
             updated_at: new Date().toISOString(),
-          }).eq("id", orderId).eq("payment_status", "pending");
+          }).eq("id", orderId).eq("stripe_session_id", session.id).eq("payment_status", "pending");
           if (error) throw error;
         }
       }
