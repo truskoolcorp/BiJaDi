@@ -76,12 +76,45 @@ Deno.serve(async (req: Request) => {
     // STRIPE
     if (payment_method === 'stripe') {
       const sk = Deno.env.get("STRIPE_SECRET_KEY"); if (!sk) return new Response(JSON.stringify({ error: "Stripe not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      const expireUnsharedSession = async (id: string) => {
+        try {
+          const expired = await fetch('https://api.stripe.com/v1/checkout/sessions/'+encodeURIComponent(id)+'/expire', {
+            method:'POST',headers:{'Authorization':`Bearer ${sk}`,'Content-Type':'application/x-www-form-urlencoded'},
+          });
+          if (!expired.ok) console.error('Unshared checkout session needs reconciliation');
+        } catch { console.error('Unshared checkout session needs reconciliation'); }
+      };
       const p = new URLSearchParams(); p.append('mode','payment'); p.append('success_url',successUrl); p.append('cancel_url',cancelUrl); p.append('customer_email',customer.email); p.append('metadata[order_id]',order.id); p.append('metadata[order_number]',order.order_number); p.append('payment_method_types[0]','card');
       cartItems.forEach((it: any, i: number) => { const l = it.name + (it.size ? ` (${it.size})` : '') + (it.color ? ` / ${it.color}` : ''); p.append(`line_items[${i}][price_data][currency]`,'usd'); p.append(`line_items[${i}][price_data][product_data][name]`,l); p.append(`line_items[${i}][price_data][unit_amount]`,String(it.price_cents)); p.append(`line_items[${i}][quantity]`,String(it.quantity)); });
-      if (discountCents > 0) { const cp = new URLSearchParams(); cp.append('amount_off',String(discountCents)); cp.append('currency','usd'); cp.append('duration','once'); cp.append('name',`BiJaDi ${appliedCode}`); const cr = await fetch('https://api.stripe.com/v1/coupons',{method:'POST',headers:{'Authorization':`Bearer ${sk}`,'Content-Type':'application/x-www-form-urlencoded'},body:cp.toString()}); const coupon = await cr.json(); if(coupon.id) p.append('discounts[0][coupon]',coupon.id); }
-      const sr = await fetch('https://api.stripe.com/v1/checkout/sessions',{method:'POST',headers:{'Authorization':`Bearer ${sk}`,'Content-Type':'application/x-www-form-urlencoded'},body:p.toString()});
-      const session = await sr.json(); if(session.error) return new Response(JSON.stringify({error:session.error.message}),{status:400,headers:{...corsHeaders,"Content-Type":"application/json"}});
-      await supabase.from("orders").update({stripe_session_id:session.id}).eq("id",order.id);
+      if (discountCents > 0) {
+        const cp = new URLSearchParams();
+        cp.append('amount_off',String(discountCents)); cp.append('currency','usd'); cp.append('duration','once');
+        cp.append('max_redemptions','1'); cp.append('name',`BiJaDi ${appliedCode}`.slice(0,40));
+        const cr = await fetch('https://api.stripe.com/v1/coupons',{
+          method:'POST',headers:{'Authorization':`Bearer ${sk}`,'Content-Type':'application/x-www-form-urlencoded','Idempotency-Key':`bijadi-coupon/${order.id}`},body:cp.toString()
+        });
+        const coupon = await cr.json();
+        if (!cr.ok || typeof coupon.id !== 'string' || !coupon.id || coupon.valid !== true ||
+            coupon.amount_off !== discountCents || coupon.currency !== 'usd') throw new Error('Discount provider unavailable');
+        p.append('discounts[0][coupon]',coupon.id);
+      }
+      const sr = await fetch('https://api.stripe.com/v1/checkout/sessions',{
+        method:'POST',headers:{'Authorization':`Bearer ${sk}`,'Content-Type':'application/x-www-form-urlencoded','Idempotency-Key':`bijadi-checkout/${order.id}`},body:p.toString()
+      });
+      const session = await sr.json();
+      if (!sr.ok || typeof session.id !== 'string' || !session.id.startsWith('cs_')) throw new Error('Checkout provider unavailable');
+      let trustedUrl = false;
+      try { const checkoutUrl = new URL(session.url); trustedUrl = checkoutUrl.protocol === 'https:' && checkoutUrl.hostname === 'checkout.stripe.com' && !checkoutUrl.username && !checkoutUrl.password; } catch {}
+      if (!trustedUrl || session.amount_total !== totalCents || session.currency !== 'usd' || session.status !== 'open') {
+        await expireUnsharedSession(session.id);
+        throw new Error('Checkout response mismatch');
+      }
+      const { data: savedOrder, error: saveError } = await supabase.from("orders")
+        .update({stripe_session_id:session.id}).eq("id",order.id).select("id").single();
+      if (saveError || !savedOrder) {
+        await expireUnsharedSession(session.id);
+        throw new Error('Checkout order tracking unavailable');
+      }
       return new Response(JSON.stringify({success:true,payment_method:'stripe',checkout_url:session.url,order_id:order.id,order_number:order.order_number,total:totalDollars}),{status:200,headers:{...corsHeaders,"Content-Type":"application/json"}});
     }
 
