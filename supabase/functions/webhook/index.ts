@@ -59,6 +59,10 @@ Deno.serve(async (req: Request) => {
       const paidEvents = ['checkout.session.completed', 'checkout.session.async_payment_succeeded'];
       if (paidEvents.includes(event.type) || event.type === 'checkout.session.expired') {
         const reported = event.data?.object;
+        // This Stripe account also serves other brands. A dedicated endpoint receives their events too.
+        const isBiJaDi = reported?.metadata?.brand === 'bijadi' ||
+          typeof reported?.metadata?.order_number === 'string' && /^BIJADI-\d+$/.test(reported.metadata.order_number);
+        if (!isBiJaDi) return new Response(JSON.stringify({received:true,ignored:true}), {status:200,headers:{...corsHeaders,'Content-Type':'application/json'}});
         if (typeof reported?.id !== "string" || !/^cs_[A-Za-z0-9_]+$/.test(reported.id) || reported.id.length > 255 ||
             typeof reported.metadata?.order_id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reported.metadata.order_id)) {
           return new Response("Checkout event missing required identifiers", { status: 500 });

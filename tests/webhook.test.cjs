@@ -7,9 +7,9 @@ const path=require('node:path');
 const vm=require('node:vm');
 const source=stripTypeScriptTypes(readFileSync(path.join(__dirname,'../supabase/functions/webhook/index.ts'),'utf8').replace(/^import .*;\n/gm,''));
 const orderId='10101010-1010-4010-8010-101010101010';
-const session={id:'cs_mock',mode:'payment',status:'complete',payment_status:'paid',amount_total:4500,currency:'usd',livemode:true,metadata:{order_id:orderId},payment_intent:'pi_mock'};
+const session={id:'cs_mock',mode:'payment',status:'complete',payment_status:'paid',amount_total:4500,currency:'usd',livemode:true,metadata:{order_id:orderId,order_number:'BIJADI-0016'},payment_intent:'pi_mock'};
 const order={id:orderId,stripe_session_id:'cs_mock',payment_method:'stripe',total_cents:4500,payment_status:'pending'};
-const event={id:'evt_mock',type:'checkout.session.completed',livemode:true,data:{object:{id:'cs_mock',metadata:{order_id:orderId}}}};
+const event={id:'evt_mock',type:'checkout.session.completed',livemode:true,data:{object:{id:'cs_mock',metadata:{order_id:orderId,order_number:'BIJADI-0016'}}}};
 function setup(options={}){
  let handler;const calls={rpc:[],fetch:[],lookup:0};
  const supabase={from(table){assert.equal(table,'orders');return {select(){return this},eq(){return this},maybeSingle:async()=>{calls.lookup++;return {data:options.order===null?null:{...order,...options.order},error:options.lookupError}}}},rpc:async(name,args)=>{calls.rpc.push({name,args});return {data:'applied',error:options.rpcError}}};
@@ -36,3 +36,5 @@ for(const [label,options]of Object.entries({
 test('transaction error is not acknowledged',async()=>{const s=setup({rpcError:{message:'mock database failure'}});assert.equal((await s.run()).status,500);assert.equal(s.calls.rpc.length,1)});
 test('unrelated signed event ignored without Stripe/database lookup',async()=>{const s=setup();assert.equal((await s.run({type:'customer.updated'})).status,200);assert.equal(s.calls.fetch.length,0);assert.equal(s.calls.lookup,0);assert.equal(s.calls.rpc.length,0)});
 test('unverified crypto callbacks remain unavailable',async()=>{const s=setup();assert.equal((await s.run({}, {provider:'coinbase'})).status,503);assert.equal(s.calls.rpc.length,0)});
+
+test('other-brand checkout events are acknowledged without lookup',async()=>{const s=setup();assert.equal((await s.run({data:{object:{id:'cs_other',metadata:{order_id:'other-brand-order'}}}})).status,200);assert.equal(s.calls.fetch.length,0);assert.equal(s.calls.lookup,0);assert.equal(s.calls.rpc.length,0)});
