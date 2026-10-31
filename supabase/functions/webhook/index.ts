@@ -82,8 +82,15 @@ Deno.serve(async (req: Request) => {
           .select('id,stripe_session_id,payment_method,subtotal_cents,shipping_cents,discount_cents,total_cents,payment_status,shipping_policy')
           .eq('id', session.metadata.order_id).maybeSingle();
         if (lookupError || !order || order.stripe_session_id !== session.id || order.payment_method !== 'stripe') throw new Error('Order lookup or identity mismatch');
+        // An abandoned session may expire before shipping selection adds the fixed fee.
+        // This exception is only for verified unpaid expiry, never for payment acceptance.
+        const expiredAwaitingShipping = event.type === 'checkout.session.expired' && session.status === 'expired' &&
+          session.payment_status === 'unpaid' && order.shipping_policy?.version === 1 &&
+          Number.isSafeInteger(order.shipping_cents) && order.shipping_cents >= 0 && session.shipping_cost == null &&
+          session.amount_total === order.total_cents - order.shipping_cents;
         if (!Number.isSafeInteger(order.total_cents) || order.total_cents < 0 ||
-            !Number.isSafeInteger(session.amount_total) || session.amount_total !== order.total_cents || session.currency !== 'usd') throw new Error('Payment total or currency mismatch');
+            !Number.isSafeInteger(session.amount_total) || session.amount_total < 0 ||
+            (session.amount_total !== order.total_cents && !expiredAwaitingShipping) || session.currency !== 'usd') throw new Error('Payment total or currency mismatch');
         const paid = session.status === 'complete' && (session.payment_status === 'paid' ||
           session.payment_status === 'no_payment_required' && session.amount_total === 0);
         if (paidEvents.includes(event.type) && !paid) {
