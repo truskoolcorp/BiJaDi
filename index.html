@@ -775,10 +775,10 @@ section[style*="background-image"],
     <p class="sl">JOIN THE MOVEMENT</p>
     <h2 class="sh">You Already Know.<br>Now Be the First.</h2>
     <p class="st">Subscribe for exclusive early access to drops, stories, and the BiJaDi Manifesto.</p>
-    <form class="sf" onsubmit="event.preventDefault();this.querySelector('button').textContent='Welcome ✓';this.querySelector('input').value='';">
-      <input type="email" placeholder="Your email address" required>
-      <button type="submit">Subscribe</button>
-    </form>
+    <form class="sf" onsubmit="event.preventDefault();location.href='mailto:truskoolcorp@truskool.net?subject=BiJaDi%20updates%20request&amp;body='+encodeURIComponent('Please send information about BiJaDi updates. Reply email: '+this.querySelector('input').value);">
+      <input type="email" placeholder="Your email address" aria-label="Email for updates inquiry" required>
+      <button type="submit">Request Updates</button>
+    </form><p>Opens a draft in your email app. Send it to request updates; no automatic subscription is created.</p>
   </div>
 </section>
 
@@ -787,8 +787,8 @@ section[style*="background-image"],
   <p class="eco-l">A Tru Skool® Entertainment International Corp. Brand</p>
   <div class="eco-b">
     <a href="https://truskool.net" target="_blank">Tru Skool®</a> • 
-    <a href="#">Concrete Rose™</a> • 
-    <a href="#">Faithfully Faded</a> • 
+    <a href="https://www.concrete-rose.world/">Concrete Rose™</a> • 
+    <a href="https://www.faithfully-faded.com/">Faithfully Faded</a> • 
     <a href="https://dallasiteontour.org" target="_blank">Dallasite on Tour™</a>
   </div>
 </div>
@@ -805,7 +805,7 @@ section[style*="background-image"],
   <div class="ft-bot">
     <p>© 2026 BiJaDi LLC. All rights reserved. A Tru Skool® Entertainment brand.</p>
   </div>
-</footer>
+<p><a href="/policies.html">Privacy, Shipping &amp; Returns</a> · <a href="mailto:truskoolcorp@truskool.net">Contact</a></p></footer>
 
 <script>
 const nav = document.getElementById('nav');
@@ -857,3 +857,4 @@ carousel.addEventListener('scroll', () => {
 </script>
 </body>
 </html>
+

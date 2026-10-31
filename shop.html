@@ -161,7 +161,8 @@ body{font-family:var(--fb);background:var(--bk);color:var(--iv);-webkit-font-smo
   <div class="sl">Pre-Order Collection</div>
   <h1>Beyond Enough.</h1>
   <p>Elevated luxury streetwear for the family. Every piece is a quiet statement — softly subtle, quietly empowering.</p>
-  <div class="preorder-badge">Shipping Spring 2026</div>
+  <p>Questions about dispatch? <a href="mailto:truskoolcorp@truskool.net?subject=BiJaDi%20dispatch%20estimate">Request a current estimate</a> before paying.</p>
+  <div class="preorder-badge">Pre-order dispatch timing requires confirmation</div>
 </div>
 
 <div class="collection-tabs">
@@ -274,7 +275,7 @@ body{font-family:var(--fb);background:var(--bk);color:var(--iv);-webkit-font-smo
 <footer class="shop-footer">
   <div class="bf-logo">BiJaDi</div>
   <div class="bf-sub">Family First — Beyond Enough</div>
-</footer>
+<p><a href="/policies.html">Privacy, Shipping &amp; Returns</a> · <a href="mailto:truskoolcorp@truskool.net">Contact</a></p></footer>
 
 <script>
 const API = 'https://hvdxrbomlvcxdpehaqri.supabase.co/functions/v1';
@@ -320,7 +321,7 @@ function renderProducts(products) {
         <div class="product-collection">${p.collection}</div>
         <div class="product-name">${p.name}</div>
         <div class="product-desc">${p.description || ''}</div>
-        <div class="product-price">$${price}<span class="preorder-note">${p.preorder_message || ''}</span></div>
+        <div class="product-price">$${price}<span class="preorder-note">${p.status === 'preorder' ? 'Contact us to confirm current dispatch timing before ordering.' : (p.preorder_message || '')}</span></div>
         <div class="selector-row">
           ${sizes ? `<div class="selector-group"><div class="selector-label">Size</div><div class="selector-options" data-type="size">${sizes}</div></div>` : ''}
           ${colors ? `<div class="selector-group"><div class="selector-label">Color</div><div class="selector-options" data-type="color">${colors}</div></div>` : ''}
@@ -517,3 +518,4 @@ loadProducts();
 <!--/email_off-->
 </body>
 </html>
+
