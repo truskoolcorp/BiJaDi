@@ -7,6 +7,20 @@ const APP_URL = SUPABASE_URL + "/functions/v1";
 
 class InputError extends Error {}
 
+type ShippingPolicy = {version:1; countries:string[]; amount_cents:number; dispatch_estimate:string};
+function configuredShipping(): ShippingPolicy | null {
+  try {
+    const value = JSON.parse(Deno.env.get('BIJADI_SHIPPING_CONFIG') || 'null');
+    const unsupported = new Set('AS CX CC CU HM IR KP MH FM NF MP PW SD SY UM VI'.split(' '));
+    const regions = new Intl.DisplayNames(['en'], {type:'region'});
+    if (!value || value.version !== 1 || !Array.isArray(value.countries) || !value.countries.length || value.countries.length > 50 ||
+        new Set(value.countries).size !== value.countries.length || value.countries.some((c: unknown) => typeof c !== 'string' || !/^[A-Z]{2}$/.test(c) || unsupported.has(c) || regions.of(c) === c || regions.of(c) === 'Unknown Region') ||
+        !Number.isSafeInteger(value.amount_cents) || value.amount_cents < 0 || value.amount_cents > 100000 ||
+        typeof value.dispatch_estimate !== 'string' || !value.dispatch_estimate.trim() || value.dispatch_estimate.length > 200) return null;
+    return {version:1,countries:value.countries,amount_cents:value.amount_cents,dispatch_estimate:value.dispatch_estimate.trim()};
+  } catch { return null; }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return new Response(JSON.stringify({ error: "POST only" }), { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -32,6 +46,8 @@ Deno.serve(async (req: Request) => {
     if (!Deno.env.get('STRIPE_SECRET_KEY') || !Deno.env.get('STRIPE_WEBHOOK_SECRET')) {
       return new Response(JSON.stringify({error:'Card checkout is being connected. Contact truskoolcorp@truskool.net for current availability and dispatch details.'}), {status:503,headers:{...corsHeaders,'Content-Type':'application/json'}});
     }
+    const shipping = configuredShipping();
+    if (!shipping) return new Response(JSON.stringify({error:'Shipping and dispatch details are being confirmed. Contact truskoolcorp@truskool.net for current availability.'}), {status:503,headers:{...corsHeaders,'Content-Type':'application/json'}});
     const supabase = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
     cleanupClient = supabase;
     const slugs = [...new Set(items.map((i: any) => i.slug))];
@@ -80,10 +96,10 @@ Deno.serve(async (req: Request) => {
       // The order insert atomically reserves capacity; verified payment redeems it.
     }
 
-    const totalCents = Math.max(subtotal - discountCents, 0);
+    const totalCents = Math.max(subtotal - discountCents, 0) + shipping.amount_cents;
     const totalDollars = (totalCents / 100).toFixed(2);
 
-    const { data: order, error: oErr } = await supabase.from("orders").insert({ order_number: '', email: customer.email, name: customer.name, phone: customer.phone || null, shipping_address: customer.address || null, items: cartItems, subtotal_cents: subtotal, shipping_cents: 0, discount_cents: discountCents, discount_code: appliedCode, total_cents: totalCents, payment_method, payment_status: 'pending', order_status: 'preorder' }).select().single();
+    const { data: order, error: oErr } = await supabase.from("orders").insert({ order_number: '', email: customer.email, name: customer.name, phone: customer.phone || null, shipping_address: null, shipping_policy: shipping, items: cartItems, subtotal_cents: subtotal, shipping_cents: shipping.amount_cents, discount_cents: discountCents, discount_code: appliedCode, total_cents: totalCents, payment_method, payment_status: 'pending', order_status: 'preorder' }).select().single();
     if (oErr?.code === "22023") throw new InputError("Discount code is unavailable.");
     if (oErr || !order) throw new Error("Order failed");
     reservedOrderId = order.id;
@@ -107,6 +123,14 @@ Deno.serve(async (req: Request) => {
         return false;
       };
       const p = new URLSearchParams(); p.append('mode','payment'); p.append('success_url',successUrl); p.append('cancel_url',cancelUrl); p.append('customer_email',customer.email); p.append('metadata[order_id]',order.id); p.append('metadata[order_number]',order.order_number); p.append('payment_method_types[0]','card');
+      p.append('metadata[brand]','bijadi');
+      p.append('metadata[shipping_policy_version]','1');
+      shipping.countries.forEach((country,i)=>p.append(`shipping_address_collection[allowed_countries][${i}]`,country));
+      p.append('shipping_options[0][shipping_rate_data][type]','fixed_amount');
+      p.append('shipping_options[0][shipping_rate_data][fixed_amount][amount]',String(shipping.amount_cents));
+      p.append('shipping_options[0][shipping_rate_data][fixed_amount][currency]','usd');
+      p.append('shipping_options[0][shipping_rate_data][display_name]','Delivery');
+      p.append('custom_text[shipping_address][message]',shipping.dispatch_estimate);
       cartItems.forEach((it: any, i: number) => { const l = it.name + (it.size ? ` (${it.size})` : '') + (it.color ? ` / ${it.color}` : ''); p.append(`line_items[${i}][price_data][currency]`,'usd'); p.append(`line_items[${i}][price_data][product_data][name]`,l); p.append(`line_items[${i}][price_data][unit_amount]`,String(it.price_cents)); p.append(`line_items[${i}][quantity]`,String(it.quantity)); });
       if (discountCents > 0) {
         const cp = new URLSearchParams();
@@ -131,7 +155,11 @@ Deno.serve(async (req: Request) => {
       if (!sr.ok || typeof session.id !== 'string' || !session.id.startsWith('cs_')) throw new Error('Checkout provider unavailable');
       let trustedUrl = false;
       try { const checkoutUrl = new URL(session.url); trustedUrl = checkoutUrl.protocol === 'https:' && checkoutUrl.hostname === 'checkout.stripe.com' && !checkoutUrl.username && !checkoutUrl.password; } catch {}
-      if (!trustedUrl || session.amount_total !== totalCents || session.currency !== 'usd' || session.status !== 'open') {
+      // Hosted Checkout may not add shipping until the buyer supplies an address.
+      // Only the configured fixed-rate option is offered; payment verifies final totals again.
+      const pendingShipping = session.shipping_cost == null && session.amount_total === totalCents - shipping.amount_cents;
+      const completeShipping = session.amount_total === totalCents && session.shipping_cost?.amount_total === shipping.amount_cents;
+      if (!trustedUrl || (!pendingShipping && !completeShipping) || session.currency !== 'usd' || session.status !== 'open') {
         safeToRelease = await expireUnsharedSession(session.id);
         throw new Error('Checkout response mismatch');
       }

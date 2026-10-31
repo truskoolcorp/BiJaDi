@@ -38,3 +38,22 @@ test('unrelated signed event ignored without Stripe/database lookup',async()=>{c
 test('unverified crypto callbacks remain unavailable',async()=>{const s=setup();assert.equal((await s.run({}, {provider:'coinbase'})).status,503);assert.equal(s.calls.rpc.length,0)});
 
 test('other-brand checkout events are acknowledged without lookup',async()=>{const s=setup();assert.equal((await s.run({data:{object:{id:'cs_other',metadata:{order_id:'other-brand-order'}}}})).status,200);assert.equal(s.calls.fetch.length,0);assert.equal(s.calls.lookup,0);assert.equal(s.calls.rpc.length,0)});
+
+const shippingPolicy={version:1,countries:['US'],amount_cents:700,dispatch_estimate:'Synthetic fixture only'};
+const shippingDetails={name:'Synthetic recipient',address:{line1:'1 Example Way',line2:null,city:'Example',state:'TX',postal_code:'00000',country:'US'}};
+const shippedOrder={shipping_policy:shippingPolicy,subtotal_cents:4500,discount_cents:0,shipping_cents:700,total_cents:5200};
+const shippedSession={amount_total:5200,amount_subtotal:4500,shipping_cost:{amount_total:700},total_details:{amount_shipping:700,amount_discount:0,amount_tax:0},collected_information:{shipping_details:shippingDetails}};
+test('current verified shipping is passed into atomic payment transaction',async()=>{const s=setup({order:shippedOrder,session:shippedSession});assert.equal((await s.run()).status,200);assert.equal(s.calls.rpc[0].name,'process_verified_bijadi_shipping_event');assert.deepEqual(JSON.parse(JSON.stringify(s.calls.rpc[0].args.p_shipping_address)),shippingDetails)});
+test('legacy Stripe shipping field works for a shipping-policy order',async()=>{const s=setup({order:shippedOrder,session:{...shippedSession,collected_information:null,shipping_details:shippingDetails}});assert.equal((await s.run()).status,200);assert.equal(s.calls.rpc[0].name,'process_verified_bijadi_shipping_event')});
+for(const [label,patch] of [
+ ['missing address',{collected_information:null}],
+ ['unsupported destination',{collected_information:{shipping_details:{...shippingDetails,address:{...shippingDetails.address,country:'DE'}}}}],
+ ['missing recipient',{collected_information:{shipping_details:{...shippingDetails,name:''}}}],
+ ['missing postal code',{collected_information:{shipping_details:{...shippingDetails,address:{...shippingDetails.address,postal_code:null}}}}],
+ ['missing state',{collected_information:{shipping_details:{...shippingDetails,address:{...shippingDetails.address,state:null}}}}],
+ ['wrong shipping amount',{shipping_cost:{amount_total:1}}],
+ ['wrong merchandise amount',{amount_subtotal:4400}],
+ ['unexpected tax',{total_details:{amount_shipping:700,amount_discount:0,amount_tax:10}}],
+ ['wrong discount',{total_details:{amount_shipping:700,amount_discount:10,amount_tax:0}}]
+])test(label+' cannot mark a shipping-policy order paid',async()=>{const s=setup({order:shippedOrder,session:{...shippedSession,...patch}});assert.equal((await s.run()).status,500);assert.equal(s.calls.rpc.length,0)});
+test('expired shipping-policy order uses atomic expiry without an address',async()=>{const s=setup({order:shippedOrder,session:{...shippedSession,status:'expired',payment_status:'unpaid',payment_intent:null,collected_information:null}});assert.equal((await s.run({type:'checkout.session.expired'})).status,200);assert.equal(s.calls.rpc[0].name,'process_verified_bijadi_shipping_event');assert.equal(s.calls.rpc[0].args.p_shipping_address,null)});

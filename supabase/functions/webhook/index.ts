@@ -79,7 +79,7 @@ Deno.serve(async (req: Request) => {
             typeof session.livemode !== 'boolean' || session.livemode !== event.livemode ||
             session.metadata?.order_id !== reported.metadata.order_id) throw new Error('Stripe session identity mismatch');
         const {data: order, error: lookupError} = await supabase.from('orders')
-          .select('id,stripe_session_id,payment_method,total_cents,payment_status')
+          .select('id,stripe_session_id,payment_method,subtotal_cents,shipping_cents,discount_cents,total_cents,payment_status,shipping_policy')
           .eq('id', session.metadata.order_id).maybeSingle();
         if (lookupError || !order || order.stripe_session_id !== session.id || order.payment_method !== 'stripe') throw new Error('Order lookup or identity mismatch');
         if (!Number.isSafeInteger(order.total_cents) || order.total_cents < 0 ||
@@ -95,12 +95,34 @@ Deno.serve(async (req: Request) => {
         }
         const intent = typeof session.payment_intent === 'string' && /^pi_[A-Za-z0-9_]+$/.test(session.payment_intent) ? session.payment_intent : null;
         if (paid && session.amount_total > 0 && !intent) throw new Error('Paid session missing payment intent');
-        const { error } = await supabase.rpc('process_verified_stripe_checkout_event', {
+        let verifiedShipping = null;
+        if (paid && order.shipping_policy != null) {
+          const policy = order.shipping_policy;
+          if (policy.version !== 1 || !Array.isArray(policy.countries) || !policy.countries.length ||
+              policy.amount_cents !== order.shipping_cents || !Number.isSafeInteger(order.shipping_cents) || order.shipping_cents < 0 ||
+              session.amount_subtotal !== order.subtotal_cents || session.shipping_cost?.amount_total !== order.shipping_cents ||
+              session.total_details?.amount_shipping !== order.shipping_cents || session.total_details?.amount_discount !== order.discount_cents || session.total_details?.amount_tax !== 0) throw new Error('Shipping total mismatch');
+          const details = session.collected_information?.shipping_details ?? session.shipping_details;
+          const address = details?.address;
+          if (typeof details?.name !== 'string' || !details.name.trim() || details.name.length > 200 ||
+              !address || typeof address !== 'object' || Array.isArray(address) ||
+              ['line1','city','country'].some(field=>typeof address[field] !== 'string' || !address[field].trim()) ||
+              !policy.countries.includes(address.country)) throw new Error('Shipping address missing or unsupported');
+          for (const field of ['line1','line2','city','state','postal_code','country']) {
+            if (address[field] != null && (typeof address[field] !== 'string' || address[field].length > 200)) throw new Error('Invalid shipping field');
+          }
+          if (['US','CA','GB','DE','ES','FR','IT','AU','NZ'].includes(address.country) && !address.postal_code?.trim() ||
+              ['US','CA','AU'].includes(address.country) && !address.state?.trim()) throw new Error('Incomplete shipping address');
+          verifiedShipping = {name:details.name.trim(),address:Object.fromEntries(['line1','line2','city','state','postal_code','country'].map(field=>[field,address[field]?.trim() || null]))};
+        }
+        const rpcName = order.shipping_policy != null ? 'process_verified_bijadi_shipping_event' : 'process_verified_stripe_checkout_event';
+        const { error } = await supabase.rpc(rpcName, {
           p_event_id: event.id,
           p_event_type: event.type,
           p_order_id: session.metadata.order_id,
           p_session_id: session.id,
           p_payment_intent: intent,
+          ...(order.shipping_policy != null ? {p_shipping_address:verifiedShipping} : {}),
         });
         if (error) throw new Error('Payment state transaction failed');
       }
