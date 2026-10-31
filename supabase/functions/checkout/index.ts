@@ -25,6 +25,10 @@ Deno.serve(async (req: Request) => {
     for (const item of items) {
       if (!item || typeof item.slug !== 'string' || !item.slug || !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 10) throw new InputError("Invalid item or quantity");
     }
+    // Do not accept a new payment while verified order updates are unconfigured.
+    if (!Deno.env.get('STRIPE_SECRET_KEY') || !Deno.env.get('STRIPE_WEBHOOK_SECRET')) {
+      return new Response(JSON.stringify({error:'Card checkout is being connected. Contact truskoolcorp@truskool.net for current availability and dispatch details.'}), {status:503,headers:{...corsHeaders,'Content-Type':'application/json'}});
+    }
     const supabase = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
     const slugs = [...new Set(items.map((i: any) => i.slug))];
     const { data: products, error: productError } = await supabase.from("products").select("*").in("slug", slugs).neq("status", "draft");
