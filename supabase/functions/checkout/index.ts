@@ -11,6 +11,9 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return new Response(JSON.stringify({ error: "POST only" }), { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
+  let cleanupClient: ReturnType<typeof createClient> | null = null;
+  let reservedOrderId: string | null = null;
+  let safeToRelease = false;
   try {
     let body;
     try { body = await req.json(); } catch { return new Response(JSON.stringify({error:"Invalid JSON"}), {status:400,headers:{...corsHeaders,"Content-Type":"application/json"}}); }
@@ -30,6 +33,7 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({error:'Card checkout is being connected. Contact truskoolcorp@truskool.net for current availability and dispatch details.'}), {status:503,headers:{...corsHeaders,'Content-Type':'application/json'}});
     }
     const supabase = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
+    cleanupClient = supabase;
     const slugs = [...new Set(items.map((i: any) => i.slug))];
     const { data: products, error: productError } = await supabase.from("products").select("*").in("slug", slugs).neq("status", "draft");
     if (productError) throw new Error("Catalog lookup failed");
@@ -73,16 +77,17 @@ Deno.serve(async (req: Request) => {
           (dc.max_uses != null && dc.used_count >= dc.max_uses) || subtotal < minimum) throw new InputError("Discount code is unavailable.");
       discountCents = dc.type === 'percent' ? Math.round(subtotal * dc.value / 100) : Math.min(dc.value,subtotal);
       appliedCode = dc.code;
-      const { error: useError } = await supabase.from("discount_codes")
-        .update({used_count:dc.used_count+1}).eq("id",dc.id);
-      if (useError) throw new Error("Discount tracking unavailable");
+      // The order insert atomically reserves capacity; verified payment redeems it.
     }
 
     const totalCents = Math.max(subtotal - discountCents, 0);
     const totalDollars = (totalCents / 100).toFixed(2);
 
     const { data: order, error: oErr } = await supabase.from("orders").insert({ order_number: '', email: customer.email, name: customer.name, phone: customer.phone || null, shipping_address: customer.address || null, items: cartItems, subtotal_cents: subtotal, shipping_cents: 0, discount_cents: discountCents, discount_code: appliedCode, total_cents: totalCents, payment_method, payment_status: 'pending', order_status: 'preorder' }).select().single();
-    if (oErr || !order) return new Response(JSON.stringify({ error: "Order failed",  }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (oErr?.code === "22023") throw new InputError("Discount code is unavailable.");
+    if (oErr || !order) throw new Error("Order failed");
+    reservedOrderId = order.id;
+    safeToRelease = true;
 
     const successUrl = (APP_URL + '/order-confirmation') + '?order=' + order.id;
     const cancelUrl = 'https://www.bijadi.net/shop.html?cancelled=true';
@@ -95,8 +100,11 @@ Deno.serve(async (req: Request) => {
           const expired = await fetch('https://api.stripe.com/v1/checkout/sessions/'+encodeURIComponent(id)+'/expire', {
             method:'POST',headers:{'Authorization':`Bearer ${sk}`,'Content-Type':'application/x-www-form-urlencoded'},
           });
-          if (!expired.ok) console.error('Unshared checkout session needs reconciliation');
+          const result = await expired.json();
+          if (expired.ok && result.id === id && result.status === "expired") return true;
+          console.error("Unshared checkout session needs reconciliation");
         } catch { console.error('Unshared checkout session needs reconciliation'); }
+        return false;
       };
       const p = new URLSearchParams(); p.append('mode','payment'); p.append('success_url',successUrl); p.append('cancel_url',cancelUrl); p.append('customer_email',customer.email); p.append('metadata[order_id]',order.id); p.append('metadata[order_number]',order.order_number); p.append('payment_method_types[0]','card');
       cartItems.forEach((it: any, i: number) => { const l = it.name + (it.size ? ` (${it.size})` : '') + (it.color ? ` / ${it.color}` : ''); p.append(`line_items[${i}][price_data][currency]`,'usd'); p.append(`line_items[${i}][price_data][product_data][name]`,l); p.append(`line_items[${i}][price_data][unit_amount]`,String(it.price_cents)); p.append(`line_items[${i}][quantity]`,String(it.quantity)); });
@@ -112,27 +120,39 @@ Deno.serve(async (req: Request) => {
             coupon.amount_off !== discountCents || coupon.currency !== 'usd') throw new Error('Discount provider unavailable');
         p.append('discounts[0][coupon]',coupon.id);
       }
+      // A timeout or server error may still have created a payable session. Retain its hold.
+      safeToRelease = false;
       const sr = await fetch('https://api.stripe.com/v1/checkout/sessions',{
         method:'POST',headers:{'Authorization':`Bearer ${sk}`,'Content-Type':'application/x-www-form-urlencoded','Idempotency-Key':`bijadi-checkout/${order.id}`},body:p.toString()
       });
+      // Stripe 4xx rejects this request; ambiguous 5xx/network outcomes require reconciliation.
+      if (sr.status >= 400 && sr.status < 500 && sr.status !== 409) safeToRelease = true;
       const session = await sr.json();
       if (!sr.ok || typeof session.id !== 'string' || !session.id.startsWith('cs_')) throw new Error('Checkout provider unavailable');
       let trustedUrl = false;
       try { const checkoutUrl = new URL(session.url); trustedUrl = checkoutUrl.protocol === 'https:' && checkoutUrl.hostname === 'checkout.stripe.com' && !checkoutUrl.username && !checkoutUrl.password; } catch {}
       if (!trustedUrl || session.amount_total !== totalCents || session.currency !== 'usd' || session.status !== 'open') {
-        await expireUnsharedSession(session.id);
+        safeToRelease = await expireUnsharedSession(session.id);
         throw new Error('Checkout response mismatch');
       }
       const { data: savedOrder, error: saveError } = await supabase.from("orders")
         .update({stripe_session_id:session.id}).eq("id",order.id).select("id").single();
       if (saveError || !savedOrder) {
-        await expireUnsharedSession(session.id);
+        safeToRelease = await expireUnsharedSession(session.id);
         throw new Error('Checkout order tracking unavailable');
       }
       return new Response(JSON.stringify({success:true,payment_method:'stripe',checkout_url:session.url,order_id:order.id,order_number:order.order_number,total:totalDollars}),{status:200,headers:{...corsHeaders,"Content-Type":"application/json"}});
     }
 
   } catch (err: any) {
+    if (safeToRelease && reservedOrderId && cleanupClient) {
+      try {
+        const { error } = await cleanupClient.from("orders")
+          .update({payment_status:"failed",order_status:"cancelled"})
+          .eq("id",reservedOrderId).eq("payment_status","pending");
+        if (error) console.error("Unpaid checkout reservation needs reconciliation");
+      } catch { console.error("Unpaid checkout reservation needs reconciliation"); }
+    }
     return new Response(JSON.stringify({ error: err instanceof InputError ? err.message : "Checkout unavailable. Please try again." }), { status: err instanceof InputError ? 400 : 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
