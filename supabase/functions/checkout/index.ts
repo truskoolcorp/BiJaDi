@@ -56,12 +56,26 @@ Deno.serve(async (req: Request) => {
 
     let discountCents = 0, appliedCode = null;
     if (discount_code) {
-      const { data: dc } = await supabase.from("discount_codes").select("*").eq("code", discount_code.toUpperCase()).eq("active", true).single();
-      if (dc && (!dc.expires_at || new Date(dc.expires_at) > new Date()) && (!dc.max_uses || dc.used_count < dc.max_uses) && subtotal >= dc.min_order_cents) {
-        discountCents = dc.type === 'percent' ? Math.round(subtotal * dc.value / 100) : Math.min(dc.value, subtotal);
-        appliedCode = dc.code;
-        await supabase.from("discount_codes").update({ used_count: dc.used_count + 1 }).eq("id", dc.id);
-      }
+      const code = discount_code.trim().toUpperCase();
+      if (!code) throw new InputError("Discount code is unavailable.");
+      const { data: dc, error: discountError } = await supabase.from("discount_codes")
+        .select("*").eq("code",code).eq("active",true).maybeSingle();
+      if (discountError) throw new Error("Discount verification unavailable");
+      if (!dc || dc.type === 'shipping') throw new InputError("Discount code is unavailable.");
+      const minimum = dc.min_order_cents ?? 0;
+      if (!['percent','fixed'].includes(dc.type) || !Number.isFinite(dc.value) || dc.value <= 0 ||
+          (dc.type === 'percent' ? dc.value > 100 : !Number.isSafeInteger(dc.value)) ||
+          !Number.isSafeInteger(minimum) || minimum < 0 ||
+          !Number.isSafeInteger(dc.used_count) || dc.used_count < 0 ||
+          (dc.max_uses != null && (!Number.isSafeInteger(dc.max_uses) || dc.max_uses < 0))) throw new Error("Discount configuration unavailable");
+      const expiry = dc.expires_at ? Date.parse(dc.expires_at) : null;
+      if ((expiry !== null && (!Number.isFinite(expiry) || expiry <= Date.now())) ||
+          (dc.max_uses != null && dc.used_count >= dc.max_uses) || subtotal < minimum) throw new InputError("Discount code is unavailable.");
+      discountCents = dc.type === 'percent' ? Math.round(subtotal * dc.value / 100) : Math.min(dc.value,subtotal);
+      appliedCode = dc.code;
+      const { error: useError } = await supabase.from("discount_codes")
+        .update({used_count:dc.used_count+1}).eq("id",dc.id);
+      if (useError) throw new Error("Discount tracking unavailable");
     }
 
     const totalCents = Math.max(subtotal - discountCents, 0);
